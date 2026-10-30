@@ -1,0 +1,248 @@
+// Design tokens. Components read these CSS custom properties; never hard-code colours.
+// Palette: circular-economy teal/emerald + Sierra Leone flag green and blue, warm amber accent.
+
+@mixin light-theme {
+  color-scheme: light;
+
+  --bg-base: #e3f1ed;
+  --blob-teal: rgb(13 148 136 / 0.55);
+  --blob-emerald: rgb(30 181 58 / 0.42);
+  --blob-ocean: rgb(0 114 198 / 0.45);
+  --blob-amber: rgb(245 158 11 / 0.4);
+  --blob-mint: rgb(110 231 183 / 0.5);
+  --noise-opacity: 0.07;
+
+  --text-1: #04201b;
+  --text-2: #1f413c;
+  --text-3: #3d5c57;
+  --text-on-accent: #ffffff;
+
+  --glass-fill: rgb(255 255 255 / 0.56);
+  --glass-fill-strong: rgb(255 255 255 / 0.76);
+  --glass-fill-subtle: rgb(255 255 255 / 0.34);
+  --glass-fill-nested: rgb(255 255 255 / 0.5);
+  --glass-rim: rgb(255 255 255 / 0.75);
+  --glass-edge: rgb(4 32 27 / 0.08);
+  --glass-highlight: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.75) 0%,
+    rgb(255 255 255 / 0.15) 22%,
+    rgb(255 255 255 / 0) 48%
+  );
+  --glass-glow: rgb(255 255 255 / 0.55);
+  --glass-shadow:
+    0 1px 1px rgb(4 32 27 / 0.04), 0 10px 28px -8px rgb(4 32 27 / 0.16),
+    0 28px 64px -24px rgb(4 50 60 / 0.22);
+  --scrim: rgb(255 255 255 / 0.55);
+
+  --accent: #0b7a62;
+  --accent-2: #0a5f8f;
+  --accent-ink: #075e4b;
+  --accent-soft: rgb(11 122 98 / 0.12);
+  --accent-gradient: linear-gradient(135deg, #0b7a62 0%, #0a6a7d 55%, #0a5f8f 100%);
+  --text-gradient: linear-gradient(100deg, #0b7a62, #0a6fa8 60%, #0b7a62);
+  --amber: #b45309;
+  --amber-gradient: linear-gradient(135deg, #f59e0b, #ea7a0c);
+
+  --success: #15803d;
+  --success-bg: rgb(22 163 74 / 0.14);
+  --warning: #a14c06;
+  --warning-bg: rgb(245 158 11 / 0.18);
+  --danger: #b91c1c;
+  --danger-bg: rgb(239 68 68 / 0.14);
+  --info: #0b5c96;
+  --info-bg: rgb(14 116 194 / 0.13);
+  --neutral: #3d5c57;
+  --neutral-bg: rgb(4 32 27 / 0.07);
+
+  --focus: #0a58ca;
+  --field-bg: rgb(255 255 255 / 0.62);
+  --field-border: rgb(4 32 27 / 0.16);
+  --field-border-hover: rgb(4 32 27 / 0.3);
+  --skeleton: rgb(4 32 27 / 0.08);
+  --skeleton-shine: rgb(255 255 255 / 0.6);
+  --ussd-dialog-bg: #f6f8f8;
+  --chart-1: #0f8a72;
+  --chart-2: #b45309;
+  --ussd-dialog-fg: #141a1c;
+  --ussd-dialog-accent: #0b62c4;
+}
+
+@mixin dark-theme {
+  color-scheme: dark;
+
+  --bg-base: #03141a;
+  --blob-teal: rgb(13 148 136 / 0.5);
+  --blob-emerald: rgb(30 181 58 / 0.32);
+  --blob-ocean: rgb(0 114 198 / 0.48);
+  --blob-amber: rgb(245 158 11 / 0.28);
+  --blob-mint: rgb(16 185 129 / 0.3);
+  --noise-opacity: 0.09;
+
+  --text-1: #ecfbf7;
+  --text-2: #c2ddd7;
+  --text-3: #98b8b1;
+  --text-on-accent: #ffffff;
+
+  --glass-fill: rgb(12 30 36 / 0.52);
+  --glass-fill-strong: rgb(12 30 36 / 0.74);
+  --glass-fill-subtle: rgb(12 30 36 / 0.32);
+  --glass-fill-nested: rgb(255 255 255 / 0.06);
+  --glass-rim: rgb(255 255 255 / 0.16);
+  --glass-edge: rgb(0 0 0 / 0.35);
+  --glass-highlight: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.2) 0%,
+    rgb(255 255 255 / 0.04) 24%,
+    rgb(255 255 255 / 0) 50%
+  );
+  --glass-glow: rgb(160 255 230 / 0.16);
+  --glass-shadow:
+    0 1px 1px rgb(0 0 0 / 0.2), 0 12px 30px -10px rgb(0 0 0 / 0.5),
+    0 30px 70px -24px rgb(0 0 0 / 0.55);
+  --scrim: rgb(3 20 26 / 0.5);
+
+  --accent: #0f9a7b;
+  --accent-2: #1281c4;
+  --accent-ink: #5eead4;
+  --accent-soft: rgb(94 234 212 / 0.12);
+  --accent-gradient: linear-gradient(135deg, #0b7a62 0%, #0a6a7d 55%, #0a5f8f 100%);
+  --text-gradient: linear-gradient(100deg, #5eead4, #7cc4ff 60%, #5eead4);
+  --amber: #fbbf24;
+  --amber-gradient: linear-gradient(135deg, #f59e0b, #ea7a0c);
+
+  --success: #4ade80;
+  --success-bg: rgb(74 222 128 / 0.14);
+  --warning: #fbbf24;
+  --warning-bg: rgb(251 191 36 / 0.14);
+  --danger: #fca5a5;
+  --danger-bg: rgb(248 113 113 / 0.16);
+  --info: #7dd3fc;
+  --info-bg: rgb(125 211 252 / 0.13);
+  --neutral: #a7c4be;
+  --neutral-bg: rgb(255 255 255 / 0.08);
+
+  --focus: #8cc8ff;
+  --field-bg: rgb(0 0 0 / 0.22);
+  --field-border: rgb(255 255 255 / 0.16);
+  --field-border-hover: rgb(255 255 255 / 0.3);
+  --skeleton: rgb(255 255 255 / 0.07);
+  --skeleton-shine: rgb(255 255 255 / 0.12);
+  --ussd-dialog-bg: #262d31;
+  --chart-1: #21a586;
+  --chart-2: #d97706;
+  --ussd-dialog-fg: #eef3f2;
+  --ussd-dialog-accent: #8cc8ff;
+}
+
+:root {
+  --font-sans:
+    'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  --font-display:
+    'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Roboto Mono', Menlo, monospace;
+
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-base: 1rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.375rem;
+  --fs-2xl: 1.75rem;
+  --fs-3xl: clamp(1.9rem, 1.4rem + 1.6vw, 2.5rem);
+  --fs-display: clamp(2.35rem, 1.3rem + 4.4vw, 4.4rem);
+
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 72px;
+
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 22px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+
+  --glass-blur: 28px;
+  --glass-saturate: 175%;
+
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-1: 120ms;
+  --dur-2: 220ms;
+  --dur-3: 420ms;
+
+  --z-nav: 50;
+  --z-overlay: 100;
+  --z-toast: 200;
+
+  --content-max: 1200px;
+  --gutter: clamp(16px, 4vw, 32px);
+  --touch: 44px;
+
+  @include light-theme;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include dark-theme;
+  }
+}
+:root[data-theme='dark'] {
+  @include dark-theme;
+}
+
+// Mid-range phones: cheaper blur.
+@media (max-width: 640px), (pointer: coarse) {
+  :root {
+    --glass-blur: 18px;
+    --glass-saturate: 160%;
+  }
+}
+
+// prefers-reduced-transparency or the "Solid surfaces" switch: opaque surfaces, no blur.
+@mixin solid-surfaces {
+  --glass-blur: 0px;
+  --glass-saturate: 100%;
+  --glass-fill: #f3faf8;
+  --glass-fill-strong: #ffffff;
+  --glass-fill-subtle: #eaf4f1;
+  --glass-fill-nested: #e6f1ee;
+  --scrim: transparent;
+}
+@mixin solid-surfaces-dark {
+  --glass-fill: #0c2127;
+  --glass-fill-strong: #0f2930;
+  --glass-fill-subtle: #0a1c21;
+  --glass-fill-nested: #133038;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    @include solid-surfaces;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      @include solid-surfaces-dark;
+    }
+  }
+  :root[data-theme='dark'] {
+    @include solid-surfaces-dark;
+  }
+}
+:root[data-solid] {
+  @include solid-surfaces;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-solid]:not([data-theme='light']) {
+    @include solid-surfaces-dark;
+  }
+}
+:root[data-solid][data-theme='dark'] {
+  @include solid-surfaces-dark;
+}

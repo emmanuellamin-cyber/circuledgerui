@@ -1,0 +1,82 @@
+.block {
+  margin-top: var(--s-6);
+}
+.h {
+  font-size: var(--fs-lg);
+  margin-bottom: var(--s-3);
+}
+.integrity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+
+  &.ok {
+    color: var(--success);
+  }
+  &.bad {
+    color: var(--danger);
+  }
+}
+.spin {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.rings {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  gap: var(--s-3);
+}
+.ring-card {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-4);
+  border-radius: var(--r-lg);
+
+  &.good .ring-cap {
+    color: var(--success);
+  }
+}
+.ring-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  strong {
+    font-size: var(--fs-xl);
+    font-weight: 750;
+    letter-spacing: -0.02em;
+  }
+}
+.ring-label {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-2);
+}
+.ring-cap {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+}
+.form-error {
+  margin-top: var(--s-3);
+  justify-content: space-between;
+  align-items: center;
+}

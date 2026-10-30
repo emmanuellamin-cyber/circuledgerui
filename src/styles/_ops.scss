@@ -1,0 +1,222 @@
+@use 'mixins' as *;
+
+// Shared workspace patterns. Global so ~20 screens share one implementation.
+
+/** Sticky filter row above lists. */
+.filter-bar {
+  position: sticky;
+  top: 72px;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  margin-bottom: var(--s-3);
+  border-radius: var(--r-lg);
+
+  > * {
+    flex: 1 1 160px;
+    min-width: 0;
+  }
+  > .fb-actions {
+    flex: 0 0 auto;
+    display: flex;
+    gap: var(--s-2);
+    align-items: center;
+    min-height: 48px;
+  }
+}
+
+/** Data tables: real <table>s on wide screens, stacked cards below 760px (td[data-label]). */
+.data {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--fs-sm);
+
+  th {
+    padding: 10px 12px;
+    text-align: left;
+    font-size: var(--fs-xs);
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    border-bottom: 1px solid var(--field-border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 12px;
+    border-bottom: 1px solid var(--field-border);
+    vertical-align: middle;
+  }
+  tbody tr {
+    transition: background var(--dur-2);
+  }
+  tbody tr:hover {
+    background: var(--neutral-bg);
+  }
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+  .r {
+    text-align: right;
+  }
+  .row-link {
+    color: var(--text-1);
+    font-weight: 600;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  .clickable {
+    cursor: pointer;
+  }
+
+  @media (max-width: 759.98px) {
+    thead {
+      @include sr-only;
+    }
+    tbody,
+    tr,
+    td {
+      display: block;
+    }
+    tr {
+      padding: var(--s-3) var(--s-2);
+      border-bottom: 1px solid var(--field-border);
+    }
+    tbody tr:last-child {
+      border-bottom: 0;
+    }
+    td {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--s-3);
+      padding: 4px 4px;
+      border: 0;
+      text-align: right;
+      &::before {
+        content: attr(data-label);
+        flex: none;
+        color: var(--text-3);
+        font-size: var(--fs-xs);
+        font-weight: 600;
+        text-align: left;
+      }
+      &.r {
+        text-align: right;
+      }
+    }
+  }
+}
+.table-wrap {
+  overflow-x: auto;
+}
+
+/** Key/value detail list. */
+.dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: var(--s-3) var(--s-4);
+  margin: 0;
+
+  dt {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  dd {
+    margin: 2px 0 0;
+    font-weight: 550;
+    word-break: break-word;
+  }
+  .wide {
+    grid-column: 1 / -1;
+  }
+}
+
+/** Two-column form grid inside dialogs. */
+.form-grid {
+  display: grid;
+  gap: var(--s-4);
+
+  @include up(sm) {
+    grid-template-columns: 1fr 1fr;
+    .full {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: var(--s-3);
+}
+.two-col {
+  display: grid;
+  gap: var(--s-4);
+  @include up(lg) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.split {
+  display: grid;
+  gap: var(--s-4);
+  align-items: start;
+  @include up(lg) {
+    grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
+  }
+}
+.pos {
+  color: var(--success);
+}
+.neg {
+  color: var(--danger);
+}
+.banner {
+  display: flex;
+  gap: var(--s-2);
+  align-items: flex-start;
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+
+  &.info {
+    background: var(--info-bg);
+    color: var(--info);
+  }
+  &.warn {
+    background: var(--warning-bg);
+    color: var(--warning);
+  }
+  &.ok {
+    background: var(--success-bg);
+    color: var(--success);
+  }
+  &.bad {
+    background: var(--danger-bg);
+    color: var(--danger);
+  }
+  a {
+    color: inherit;
+    font-weight: 650;
+  }
+}
+.link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent-ink);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}

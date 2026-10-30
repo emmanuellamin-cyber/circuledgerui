@@ -1,0 +1,138 @@
+@use 'mixins' as *;
+
+// ---------------------------------------------------------------------------------------------
+// Glass surfaces. Global so every component shares one implementation (and one style budget).
+//
+//   .glass           base translucent panel: blur + saturate, 1px inner rim, specular highlight
+//   .glass--strong   denser fill (modals, menus, text-heavy panels)
+//   .glass--subtle   lighter fill (chips, secondary tiles)
+//   .glass--lens     adds the SVG refraction filter (Chromium + fine pointer only, see GlassFilters)
+//   .liquid          pointer-following highlight, driven by the [liquid] directive
+//
+// Performance rule: a glass surface inside another glass surface does NOT blur again; it gets a
+// tinted fill only. That keeps the number of stacked backdrop-filters to one per stack.
+// ---------------------------------------------------------------------------------------------
+
+.glass {
+  @include glass-surface;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--glass-highlight);
+    pointer-events: none;
+  }
+}
+
+.glass--strong {
+  background: var(--glass-fill-strong);
+}
+.glass--subtle {
+  background: var(--glass-fill-subtle);
+}
+
+.glass .glass,
+.glass .glass-nested {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: var(--glass-fill-nested);
+  box-shadow:
+    inset 0 0 0 1px var(--glass-rim),
+    0 1px 2px var(--glass-edge);
+}
+
+// Refraction: displaced backdrop + blur, with a faint chromatic rim to suggest dispersion.
+:root.fx-lens:not([data-solid]) .glass--lens {
+  -webkit-backdrop-filter: url(#cl-lens) blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: url(#cl-lens) blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  box-shadow:
+    inset 0 0 0 1px var(--glass-rim),
+    inset 1px 1px 0 0 rgb(120 255 220 / 0.18),
+    inset -1px -1px 0 0 rgb(255 190 110 / 0.16),
+    0 0 0 1px var(--glass-edge),
+    var(--glass-shadow);
+}
+
+.liquid {
+  --mx: 50%;
+  --my: 0%;
+  transition:
+    transform var(--dur-2) var(--ease-spring),
+    box-shadow var(--dur-2) var(--ease-out);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: radial-gradient(
+      220px circle at var(--mx) var(--my),
+      var(--glass-glow),
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity var(--dur-3) var(--ease-out);
+    pointer-events: none;
+  }
+
+  @media (hover: hover) {
+    &:hover::after {
+      opacity: 1;
+    }
+  }
+}
+
+.liquid--lift {
+  @media (hover: hover) {
+    &:hover {
+      transform: translateY(-2px) scale(1.006);
+    }
+  }
+  &:active {
+    transform: scale(0.985);
+    transition-duration: var(--dur-1);
+  }
+}
+
+@include reduced-motion {
+  .liquid,
+  .liquid--lift {
+    transition: none;
+    &:hover,
+    &:active {
+      transform: none;
+    }
+  }
+}
+
+// Readable text directly on the liquid background.
+.scrim {
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -12% -8%;
+    z-index: -1;
+    background: radial-gradient(closest-side, var(--scrim), transparent);
+    pointer-events: none;
+  }
+}
+
+// CDK dialog panel/backdrop used by GlassModal.
+.cl-modal-backdrop {
+  background: rgb(2 16 20 / 0.38);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+:root[data-solid] .cl-modal-backdrop {
+  backdrop-filter: none;
+  background: rgb(2 16 20 / 0.6);
+}
+.cl-modal-panel {
+  max-width: min(560px, calc(100vw - 32px));
+  width: 100%;
+}

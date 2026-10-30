@@ -1,0 +1,297 @@
+<section class="container page">
+  <header class="page-head">
+    <div class="titles">
+      <p class="eyebrow">{{ mode() === 'ops' ? 'Tools' : 'Live demo' }}</p>
+      <h1>USSD & SMS simulator</h1>
+      <p class="muted">
+        A simulated phone talking to the real API. Menus are shown exactly as the server returns
+        them.
+      </p>
+    </div>
+    <glass-tabs [tabs]="channelTabs" [(selected)]="channel" ariaLabel="Channel" />
+  </header>
+
+  <div class="layout">
+    <!-- Left: quick select + demo script -->
+    <aside class="side left">
+      @if (channel() === 'ussd') {
+        <glass-card
+          heading="Quick select"
+          subheading="Tap an option to fill the reply."
+          padding="sm"
+        >
+          @if (store.options().length) {
+            <div class="chips" role="group" aria-label="Menu options">
+              @for (o of store.options(); track o.key) {
+                <button
+                  type="button"
+                  class="chip glass"
+                  [class.on]="store.input() === o.key"
+                  (click)="choose(o.key)"
+                >
+                  <span class="k num">{{ o.key }}</span
+                  >{{ o.label }}
+                </button>
+              }
+            </div>
+          } @else if (store.screen() === 'dialog') {
+            <p class="subtle small">This step expects typed text.</p>
+          } @else {
+            <p class="subtle small">Options appear here when a menu is on screen.</p>
+          }
+        </glass-card>
+
+        <glass-card
+          heading="Demo script"
+          subheading="§10 walkthrough: sell a Samsung for pickup in Towama."
+          padding="sm"
+        >
+          <ol class="steps">
+            <li [class.now]="demo.step() === 0" [class.done]="demo.step() > 0">
+              Dial <span class="mono">{{ store.serviceCode() }}</span>
+            </li>
+            @for (e of demo.entries; track $index; let n = $index) {
+              <li
+                [class.now]="demo.step() === n + 1"
+                [class.done]="demo.step() > n + 1 || demo.state() === 'done'"
+              >
+                Reply <span class="mono">{{ e }}</span>
+              </li>
+            }
+          </ol>
+          <div class="row controls">
+            @switch (demo.state()) {
+              @case ('running') {
+                <button glass-button size="sm" type="button" (click)="demo.pause()">
+                  <lucide-icon [img]="i.Pause" [size]="15" aria-hidden="true" /> Pause
+                </button>
+              }
+              @case ('paused') {
+                <button
+                  glass-button
+                  size="sm"
+                  variant="primary"
+                  type="button"
+                  (click)="demo.resume()"
+                >
+                  <lucide-icon [img]="i.Play" [size]="15" aria-hidden="true" /> Resume
+                </button>
+              }
+              @default {
+                <button
+                  glass-button
+                  size="sm"
+                  variant="primary"
+                  type="button"
+                  (click)="demo.start()"
+                >
+                  <lucide-icon [img]="i.Play" [size]="15" aria-hidden="true" /> Run demo script
+                </button>
+              }
+            }
+            <button
+              glass-button
+              size="sm"
+              type="button"
+              [disabled]="demo.state() === 'running'"
+              (click)="demo.next()"
+            >
+              <lucide-icon [img]="i.SkipForward" [size]="15" aria-hidden="true" /> Step
+            </button>
+            @if (demo.state() === 'running' || demo.state() === 'paused') {
+              <button glass-button size="sm" variant="ghost" type="button" (click)="demo.stop()">
+                <lucide-icon [img]="i.Square" [size]="14" aria-hidden="true" /> Stop
+              </button>
+            }
+          </div>
+        </glass-card>
+      } @else {
+        <glass-card
+          heading="SMS keywords"
+          subheading="Sent from the simulated phone number."
+          padding="sm"
+        >
+          <ul class="kw">
+            <li>
+              <span class="mono">SELL &lt;brand&gt; &lt;DEAD|SCREEN|FAULTY&gt; &lt;area&gt;</span>
+            </li>
+            <li><span class="mono">STATUS &lt;reference&gt;</span></li>
+            <li><span class="mono">VERIFY &lt;certificate number&gt;</span></li>
+            <li class="subtle">Anything else returns the help text.</li>
+          </ul>
+        </glass-card>
+      }
+    </aside>
+
+    <!-- Centre: the phone -->
+    <div class="phone-col">
+      <phone-frame [carrier]="carrierValue()">
+        @if (channel() === 'ussd') {
+          <ussd-screen />
+        } @else {
+          <sms-chat />
+        }
+      </phone-frame>
+    </div>
+
+    <!-- Right: session, found codes, log -->
+    <aside class="side right">
+      <glass-card heading="Session" padding="sm">
+        <button card-actions glass-button size="sm" type="button" (click)="newSession()">
+          <lucide-icon [img]="i.RotateCcw" [size]="15" aria-hidden="true" /> New session
+        </button>
+        <div class="fields">
+          <glass-input label="Phone number" type="tel" inputmode="tel" [formControl]="phone" />
+          <glass-input label="Service code" [formControl]="code" hint="Default from environment." />
+          <glass-select label="Network" [options]="carriers" [formControl]="carrier" />
+        </div>
+        <dl class="meta">
+          <div>
+            <dt>Session ID</dt>
+            <dd class="mono id">{{ store.sessionId() }}</dd>
+          </div>
+          <div>
+            <dt>Next <code>text</code></dt>
+            <dd class="mono">{{ store.active() ? displayText(store.nextText()) : '—' }}</dd>
+          </div>
+        </dl>
+        <div class="timer" [class.low]="store.remaining() <= 30" [class.idle]="!store.active()">
+          <span>Session timeout</span>
+          <strong class="num">{{ store.active() ? countdown() : '3:00' }}</strong>
+          <span class="bar" aria-hidden="true"
+            ><i [style.width.%]="store.active() ? countdownPct() : 100"></i
+          ></span>
+        </div>
+        <button
+          type="button"
+          class="sound"
+          [attr.aria-pressed]="feedback.enabled()"
+          (click)="feedback.toggle()"
+        >
+          <lucide-icon
+            [img]="feedback.enabled() ? i.Volume2 : i.VolumeX"
+            [size]="16"
+            aria-hidden="true"
+          />
+          Key sounds {{ feedback.enabled() ? 'on' : 'off' }}
+        </button>
+      </glass-card>
+
+      @if (found().length) {
+        <glass-card heading="Found in responses" padding="sm" class="found">
+          <ul class="codes">
+            @for (c of found(); track c.value) {
+              <li>
+                <div class="code-row">
+                  <span class="mono code">{{ c.value }}</span>
+                  <span class="subtle small">{{
+                    c.type === 'reference' ? 'Reference code' : 'Certificate'
+                  }}</span>
+                </div>
+                <div class="row">
+                  <button
+                    glass-button
+                    size="sm"
+                    type="button"
+                    (click)="copy(c.value, 'Copied ' + c.value)"
+                  >
+                    <lucide-icon [img]="i.Copy" [size]="14" aria-hidden="true" /> Copy
+                  </button>
+                  @if (c.type === 'reference' && canLookUpIntake()) {
+                    <button glass-button size="sm" type="button" (click)="lookUp(c.value)">
+                      <lucide-icon [img]="i.FileSearch" [size]="14" aria-hidden="true" /> Look up
+                      intake request
+                    </button>
+                  }
+                  @if (c.type === 'certificate') {
+                    <button glass-button size="sm" type="button" (click)="verify(c.value)">
+                      <lucide-icon [img]="i.ShieldCheck" [size]="14" aria-hidden="true" /> Verify
+                      certificate
+                    </button>
+                  }
+                </div>
+                @if (lookup(); as l) {
+                  @if (l.code === c.value) {
+                    <div class="lookup glass" aria-live="polite" [attr.aria-busy]="l.loading">
+                      @if (l.loading) {
+                        <p class="subtle small">Looking up…</p>
+                      } @else if (l.result; as r) {
+                        <div class="row between">
+                          <strong>{{ r.brand }}{{ r.model ? ' ' + r.model : '' }}</strong>
+                          <status-pill [status]="r.status" />
+                        </div>
+                        <p class="small muted">
+                          {{ conditionLabels[r.reportedCondition] }} ·
+                          {{
+                            r.fulfilmentMethod === 'Pickup'
+                              ? 'Pickup: ' + (r.pickupArea ?? '—')
+                              : 'Drop-off: ' + (r.dropOffPointName ?? '—')
+                          }}
+                        </p>
+                        <p class="small muted">
+                          Offer {{ r.estimatedOfferSle | sle }} · {{ r.citizenPhoneMasked }} ·
+                          {{ r.createdAt | relativeTime }}
+                        </p>
+                      } @else {
+                        <p class="small error">{{ l.error }}</p>
+                      }
+                    </div>
+                  }
+                }
+              </li>
+            }
+          </ul>
+        </glass-card>
+      }
+
+      <glass-card
+        heading="Request log"
+        [subheading]="
+          channel() === 'sms'
+            ? 'USSD hops (SMS replies show in the chat).'
+            : 'Newest first. Tap a row for details.'
+        "
+        padding="sm"
+      >
+        @if (store.log().length) {
+          <ol class="log">
+            @for (e of store.log(); track e.id) {
+              <li>
+                <button
+                  type="button"
+                  class="log-row"
+                  [attr.aria-expanded]="expanded() === e.id"
+                  (click)="toggle(e)"
+                >
+                  <span class="num t">{{ e.at.slice(11, 19) }}</span>
+                  <span class="mono txt">{{ displayText(e.text) }}</span>
+                  <span class="kind" [class]="'kind k-' + e.kind">{{ e.kind }}</span>
+                  <span class="num ms">{{ e.latencyMs }} ms</span>
+                </button>
+                @if (expanded() === e.id) {
+                  <div class="log-detail">
+                    <p class="label">
+                      Status {{ e.status ?? 'network error' }} · session
+                      <span class="mono">{{ e.sessionId.slice(0, 8) }}</span>
+                    </p>
+                    <pre class="raw">{{ e.raw }}</pre>
+                    <button
+                      glass-button
+                      size="sm"
+                      type="button"
+                      (click)="copy(e.curl, 'curl command copied')"
+                    >
+                      <lucide-icon [img]="i.Copy" [size]="14" aria-hidden="true" /> Copy as curl
+                    </button>
+                  </div>
+                }
+              </li>
+            }
+          </ol>
+        } @else {
+          <p class="subtle small">Press the green call button to send the first request.</p>
+        }
+      </glass-card>
+    </aside>
+  </div>
+</section>

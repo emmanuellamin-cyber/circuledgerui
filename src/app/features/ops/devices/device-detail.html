@@ -1,0 +1,212 @@
+@if (device.value(); as d) {
+  <page-header
+    [heading]="d.trackingId"
+    [subheading]="d.brand + (d.model ? ' ' + d.model : '') + ' · ' + conditionLabels[d.condition]"
+  >
+    <ng-container page-actions>
+      <a glass-button size="sm" routerLink="/ops/devices"
+        ><lucide-icon [img]="i.ArrowLeft" [size]="15" aria-hidden="true" /> Register</a
+      >
+      @if (canPurchase(d)) {
+        <button glass-button variant="primary" type="button" (click)="buy(d)">
+          <lucide-icon [img]="i.HandCoins" [size]="16" aria-hidden="true" /> Purchase
+        </button>
+      }
+      @if (canRecordPayout(d)) {
+        <button glass-button type="button" (click)="payout(d)">
+          <lucide-icon [img]="i.Receipt" [size]="16" aria-hidden="true" /> Record payout
+        </button>
+      }
+      @if (canList(d)) {
+        <button glass-button variant="primary" type="button" (click)="list(d)">
+          <lucide-icon [img]="i.Store" [size]="16" aria-hidden="true" /> Create listing
+        </button>
+      }
+    </ng-container>
+  </page-header>
+
+  <div class="split">
+    <div class="stack">
+      <glass-card heading="Device">
+        <status-pill card-actions [status]="d.status" [label]="statusLabels[d.status]" />
+        <dl class="dl">
+          <div>
+            <dt>IMEI</dt>
+            <dd class="mono">{{ d.maskedImei }}</dd>
+          </div>
+          <div>
+            <dt>Intake</dt>
+            <dd>
+              {{ channelLabels[d.intakeChannel] }}
+              @if (d.intakeReference) {
+                · <span class="mono">{{ d.intakeReference }}</span>
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Location</dt>
+            <dd>{{ d.locationName ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt>Samsung flagship</dt>
+            <dd>{{ d.isSamsungFlagship ? 'Yes' : 'No' }}</dd>
+          </div>
+          <div>
+            <dt>Recovery outcome</dt>
+            <dd>{{ d.recoveryOutcome ? humanize(d.recoveryOutcome) : '—' }}</dd>
+          </div>
+          <div>
+            <dt>Certificate</dt>
+            <dd class="mono">
+              @if (d.certificateNumber) {
+                <a [routerLink]="['/ops/certificates', d.certificateNumber]">{{
+                  d.certificateNumber
+                }}</a>
+              } @else {
+                —
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Created</dt>
+            <dd>{{ when(d.createdAt) }}</dd>
+          </div>
+        </dl>
+        @if (nextStep(d); as n) {
+          <p class="banner info next">Next step · {{ n }}</p>
+        }
+      </glass-card>
+
+      <glass-card heading="Purchase">
+        @if (purchase.value(); as p) {
+          <dl class="dl">
+            <div>
+              <dt>Offered</dt>
+              <dd class="num">{{ money(p.offeredPriceSle) }}</dd>
+            </div>
+            <div>
+              <dt>Paid</dt>
+              <dd class="num">{{ money(p.paidPriceSle) }}</dd>
+            </div>
+            <div>
+              <dt>Payout</dt>
+              <dd>
+                {{ payoutLabels[p.payoutMethod] }} · <status-pill [status]="p.payoutStatus" />
+              </dd>
+            </div>
+            <div>
+              <dt>Reference</dt>
+              <dd class="mono">{{ p.payoutReference ?? '—' }}</dd>
+            </div>
+            <div>
+              <dt>Bought</dt>
+              <dd>{{ when(p.createdAt) }}</dd>
+            </div>
+            @if (p.payoutCompletedAt) {
+              <div>
+                <dt>Paid out</dt>
+                <dd>{{ when(p.payoutCompletedAt) }}</dd>
+              </div>
+            }
+          </dl>
+        } @else if (purchase.isLoading()) {
+          <skeleton [lines]="3" />
+        } @else {
+          <p class="muted small">
+            Not purchased yet.
+            @if (canPurchase(d)) {
+              Use <strong>Purchase</strong> to buy it from the Seed Fund.
+            }
+          </p>
+        }
+      </glass-card>
+
+      <glass-card
+        heading="Data wipes"
+        subheading="Oldest first. The passed record carries the certificate."
+      >
+        @if (wipes.value()?.length) {
+          <ul class="wipes">
+            @for (w of wipes.value(); track w.id) {
+              <li class="glass">
+                <div class="row between">
+                  <strong>{{ methodLabels[w.method] }}</strong>
+                  <status-pill [status]="w.outcome" />
+                </div>
+                <p class="subtle small">
+                  {{ when(w.completedAt) }} · {{ w.passes }} pass{{ w.passes === 1 ? '' : 'es' }}
+                  @if (w.toolName) {
+                    · {{ w.toolName }}
+                  }
+                </p>
+                @if (w.notes) {
+                  <p class="small">{{ w.notes }}</p>
+                }
+                @if (w.certificate) {
+                  <a
+                    class="small mono"
+                    [routerLink]="['/ops/certificates', w.certificate.certificateNumber]"
+                    >{{ w.certificate.certificateNumber }}</a
+                  >
+                }
+              </li>
+            }
+          </ul>
+        } @else if (wipes.isLoading()) {
+          <skeleton [lines]="2" />
+        } @else {
+          <p class="muted small">No wipe recorded yet.</p>
+        }
+      </glass-card>
+    </div>
+
+    <glass-card heading="Ledger history" subheading="Tamper-evident trail of every step.">
+      @if (history.value(); as h) {
+        @if (h.events.length) {
+          <ledger-timeline [events]="h.events" />
+        } @else {
+          <p class="muted small">No ledger events yet.</p>
+        }
+      } @else if (history.isLoading()) {
+        <skeleton [lines]="6" />
+      } @else if (history.error()) {
+        <p class="form-error">Couldn't load the ledger history.</p>
+      }
+    </glass-card>
+  </div>
+} @else if (device.error()) {
+  <empty-state heading="Device not found" [message]="errorText()">
+    <a glass-button size="sm" routerLink="/ops/devices">Back to the register</a>
+  </empty-state>
+} @else {
+  <skeleton height="34px" width="40%" />
+  <div class="split" style="margin-top: 16px"><skeleton [lines]="8" /><skeleton [lines]="8" /></div>
+}
+
+<style>
+  .stack {
+    --stack-gap: var(--s-4);
+  }
+  .small {
+    font-size: var(--fs-sm);
+  }
+  .between {
+    justify-content: space-between;
+  }
+  .next {
+    margin-top: var(--s-4);
+  }
+  .wipes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--s-2);
+  }
+  .wipes li {
+    display: grid;
+    gap: 4px;
+    padding: var(--s-3);
+    border-radius: var(--r-md);
+  }
+</style>

@@ -1,0 +1,180 @@
+<!-- Hero -->
+<section class="hero container" aria-labelledby="hero-title">
+  <div class="hero-copy scrim">
+    <p class="eyebrow">Smart Youth Mobile Circularity Hub · Njala University</p>
+    <h1 id="hero-title" class="display">
+      We buy your broken phone, <span class="grad">secure your data</span>, and give it a second
+      life.
+    </h1>
+    <p class="lead">
+      Sell a dead or cracked phone from anywhere in Sierra Leone. We wipe it, send you a certificate
+      that proves your data is gone, then repair it or recover its parts safely.
+    </p>
+    <div class="ctas">
+      <a glass-button variant="primary" size="lg" routerLink="/" fragment="sell">
+        <lucide-icon [img]="i.HandCoins" [size]="19" aria-hidden="true" /> Sell your phone
+      </a>
+      <a glass-button size="lg" routerLink="/marketplace">
+        <lucide-icon [img]="i.ShoppingBag" [size]="19" aria-hidden="true" /> Browse refurbished
+        phones
+      </a>
+    </div>
+    <ul class="trust" aria-label="Why sell to the Hub">
+      <li>
+        <lucide-icon [img]="i.ShieldCheck" [size]="17" aria-hidden="true" /> Certified data wipe
+      </li>
+      <li>
+        <lucide-icon [img]="i.Phone" [size]="17" aria-hidden="true" /> Works on any phone, no data
+      </li>
+      <li>
+        <lucide-icon [img]="i.HandCoins" [size]="17" aria-hidden="true" /> Paid by Orange Money,
+        Afrimoney or cash
+      </li>
+    </ul>
+  </div>
+
+  <div class="hero-visual">
+    <hero-phone [code]="ussdCode" />
+    <div class="chip glass c1" aria-hidden="true">
+      <lucide-icon [img]="i.BadgeCheck" [size]="18" /> Data wiped & certified
+    </div>
+    <div class="chip glass c2" aria-hidden="true">
+      <lucide-icon [img]="i.HandCoins" [size]="18" /> Paid to your mobile money
+    </div>
+    <div class="chip glass c3" aria-hidden="true">
+      <lucide-icon [img]="i.MapPin" [size]="18" /> Drop off or get picked up
+    </div>
+  </div>
+</section>
+
+<!-- Pilot targets -->
+<section class="container" aria-labelledby="impact-title">
+  <div class="impact glass" reveal>
+    <div class="impact-head">
+      <h2 id="impact-title">Pilot targets</h2>
+      <p class="muted">What this pilot is working towards. These are goals, not results yet.</p>
+    </div>
+    <ul class="targets">
+      @for (t of targets; track t.label; let n = $index) {
+        <li class="target" [reveal]="n">
+          <lucide-icon [img]="t.icon" [size]="20" aria-hidden="true" />
+          <span class="value num">{{ t.value }}</span>
+          <span class="label">{{ t.label }}</span>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<!-- How it works -->
+<section id="how" class="container section" aria-labelledby="how-title">
+  <div class="section-head scrim" reveal>
+    <p class="eyebrow">How it works</p>
+    <h2 id="how-title">Five steps from a drawer to a second life</h2>
+    <p>
+      Every step is recorded on a tamper-evident ledger, so a phone can be traced from the day we
+      buy it.
+    </p>
+  </div>
+  <pipeline-timeline />
+</section>
+
+<!-- Sell -->
+<section id="sell" class="container section" aria-labelledby="sell-title">
+  <div class="section-head scrim" reveal>
+    <p class="eyebrow">Sell your phone</p>
+    <h2 id="sell-title">How much is my phone worth?</h2>
+    <p>Get an estimate in seconds, then sell it the way that suits you.</p>
+  </div>
+
+  <div class="sell-grid">
+    <glass-card
+      padding="lg"
+      heading="Price estimate"
+      subheading="Prices come from the Hub's current price list."
+      reveal
+    >
+      <price-quote-widget />
+    </glass-card>
+
+    <div class="ways" reveal="1">
+      <h3 class="ways-title">Three ways to sell</h3>
+      <div class="way glass" liquid>
+        <span class="way-icon"><lucide-icon [img]="i.Phone" [size]="22" aria-hidden="true" /></span>
+        <div>
+          <h4>
+            Dial <span class="mono code">{{ ussdCode }}</span>
+          </h4>
+          <p>
+            From any phone, no data needed. Choose your brand and condition, then drop-off or
+            pickup. You get a reference code by SMS.
+          </p>
+          <a class="try" routerLink="/demo/ussd"
+            >Try it in the simulator
+            <lucide-icon [img]="i.ArrowRight" [size]="14" aria-hidden="true"
+          /></a>
+        </div>
+      </div>
+      <div class="way glass" liquid>
+        <span class="way-icon"
+          ><lucide-icon [img]="i.MessageSquare" [size]="22" aria-hidden="true"
+        /></span>
+        <div>
+          <h4>Send an SMS</h4>
+          <p>
+            Text <span class="mono">SELL Samsung SCREEN Kowama</span> with your brand, what's wrong
+            (DEAD, SCREEN or FAULTY) and your area.
+          </p>
+        </div>
+      </div>
+      <div class="way glass" liquid>
+        <span class="way-icon"><lucide-icon [img]="i.Truck" [size]="22" aria-hidden="true" /></span>
+        <div>
+          <h4>Walk in</h4>
+          <p>
+            Bring it to any drop-off point below. Staff check it, agree the price and pay you on the
+            spot.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dropoff" reveal>
+    <h3 class="dropoff-title">Drop-off points</h3>
+    <drop-off-points />
+  </div>
+</section>
+
+<!-- Verify -->
+<section id="verify" class="container section" aria-labelledby="verify-title">
+  <div class="verify-grid">
+    <div class="section-head scrim" reveal>
+      <p class="eyebrow">Proof your data is gone</p>
+      <h2 id="verify-title">Verify a certificate</h2>
+      <p>
+        Every certificate is digitally signed by the Hub. Buyers can check a refurbished phone's
+        certificate too, before they pay.
+      </p>
+    </div>
+    <glass-card padding="lg" reveal="1">
+      <certificate-verify-widget />
+    </glass-card>
+  </div>
+</section>
+
+<!-- Closing CTA -->
+<section class="container section cta-wrap">
+  <div class="cta glass glass--lens" reveal>
+    <h2>Have an old phone in a drawer?</h2>
+    <p class="muted">
+      Turn it into money, keep your data safe, and help train young repair technicians.
+    </p>
+    <div class="ctas">
+      <a glass-button variant="primary" size="lg" routerLink="/" fragment="sell">
+        Sell your phone <lucide-icon [img]="i.ArrowRight" [size]="18" aria-hidden="true" />
+      </a>
+      <a glass-button size="lg" routerLink="/register">Create an account</a>
+    </div>
+  </div>
+</section>

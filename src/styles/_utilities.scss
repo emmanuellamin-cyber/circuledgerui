@@ -1,0 +1,110 @@
+@use 'mixins' as *;
+
+.sr-only {
+  @include sr-only;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/** Money and KPIs. */
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.muted {
+  color: var(--text-2);
+}
+.subtle {
+  color: var(--text-3);
+}
+
+.eyebrow {
+  font-size: var(--fs-xs);
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--stack-gap, var(--s-4));
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--row-gap, var(--s-3));
+  flex-wrap: wrap;
+}
+
+.form-error {
+  display: flex;
+  gap: var(--s-2);
+  align-items: flex-start;
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-sm);
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+}
+
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: calc(var(--z-toast) + 1);
+  padding: 10px 16px;
+  border-radius: var(--r-pill);
+  background: var(--glass-fill-strong);
+  color: var(--text-1);
+  font-weight: 600;
+  transform: translateY(-150%);
+  transition: transform var(--dur-2) var(--ease-out);
+  &:focus {
+    transform: none;
+  }
+}
+
+.section {
+  padding-block: clamp(48px, 8vw, 96px);
+}
+
+.section-head {
+  max-width: 680px;
+  margin-bottom: var(--s-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  p {
+    color: var(--text-2);
+    font-size: var(--fs-lg);
+  }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 700ms var(--ease-out),
+    transform 700ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 90ms);
+  &.in-view {
+    opacity: 1;
+    transform: none;
+  }
+}
+@include reduced-motion {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

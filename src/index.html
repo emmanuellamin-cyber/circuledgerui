@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CircuLedger · Smart Youth Mobile Circularity Hub</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="Sell your broken phone, get your data securely wiped and certified, and buy certified refurbished phones. Smart Youth Mobile Circularity Hub, Njala University, Sierra Leone."
+    />
+    <meta name="theme-color" content="#e3f1ed" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#03141a" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap"
+    />
+    <script>
+      // Apply the saved theme before first paint (ThemeService keeps it in sync afterwards).
+      try {
+        var t = localStorage.getItem('cl.theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+        if (localStorage.getItem('cl.solid') === '1')
+          document.documentElement.setAttribute('data-solid', '');
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <app-root></app-root>
+    <noscript
+      >CircuLedger needs JavaScript. You can still sell a phone by dialling *384*1234#.</noscript
+    >
+  </body>
+</html>

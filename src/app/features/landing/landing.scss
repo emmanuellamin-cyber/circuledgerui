@@ -1,0 +1,261 @@
+@use 'mixins' as *;
+
+.hero {
+  display: grid;
+  gap: var(--s-6);
+  align-items: center;
+  padding-block: clamp(32px, 7vw, 88px) var(--s-6);
+
+  @include up(md) {
+    grid-template-columns: 1.15fr 0.85fr;
+  }
+}
+
+.hero-copy {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.display {
+  font-size: var(--fs-display);
+  font-weight: 780;
+  letter-spacing: -0.04em;
+  line-height: 1.02;
+}
+
+.grad {
+  background: var(--text-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.lead {
+  max-width: 54ch;
+  font-size: var(--fs-lg);
+  color: var(--text-2);
+}
+
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  margin-top: var(--s-2);
+}
+
+.trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-4);
+  margin: var(--s-2) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-2);
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  lucide-icon {
+    color: var(--accent-ink);
+  }
+}
+
+.hero-visual {
+  position: relative;
+  padding-block: var(--s-4);
+}
+
+.chip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  white-space: nowrap;
+  animation: bob 6s ease-in-out infinite;
+
+  lucide-icon {
+    color: var(--accent-ink);
+  }
+}
+.c1 {
+  top: 12%;
+  left: -2%;
+}
+.c2 {
+  top: 46%;
+  right: -4%;
+  animation-delay: -2s;
+}
+.c3 {
+  bottom: 10%;
+  left: 4%;
+  animation-delay: -4s;
+}
+@media (max-width: 520px) {
+  .chip {
+    display: none;
+  }
+}
+@keyframes bob {
+  50% {
+    transform: translateY(-10px);
+  }
+}
+@include reduced-motion {
+  .chip {
+    animation: none;
+  }
+}
+
+// Pilot targets
+.impact {
+  display: grid;
+  gap: var(--s-4);
+  padding: var(--s-5);
+  border-radius: var(--r-xl);
+
+  @include up(lg) {
+    grid-template-columns: 220px 1fr;
+    align-items: center;
+  }
+}
+.impact-head {
+  display: grid;
+  gap: 4px;
+  h2 {
+    font-size: var(--fs-xl);
+  }
+  p {
+    font-size: var(--fs-sm);
+  }
+}
+.targets {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--s-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.target {
+  display: grid;
+  gap: 2px;
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-md);
+  background: var(--glass-fill-nested);
+  box-shadow: inset 0 0 0 1px var(--glass-rim);
+
+  lucide-icon {
+    color: var(--accent-ink);
+    margin-bottom: 4px;
+  }
+  .value {
+    font-size: var(--fs-2xl);
+    font-weight: 780;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  .label {
+    font-size: var(--fs-xs);
+    color: var(--text-2);
+    font-weight: 550;
+  }
+}
+
+// Sell
+.sell-grid {
+  display: grid;
+  gap: var(--s-5);
+  align-items: start;
+
+  @include up(md) {
+    grid-template-columns: 1.1fr 0.9fr;
+  }
+}
+.ways {
+  display: grid;
+  gap: var(--s-3);
+}
+.ways-title,
+.dropoff-title {
+  font-size: var(--fs-xl);
+  margin-bottom: var(--s-1);
+}
+.way {
+  display: flex;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-5);
+  border-radius: var(--r-lg);
+
+  h4 {
+    font-size: var(--fs-base);
+    margin-bottom: 4px;
+  }
+  p {
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+  }
+}
+.way-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  color: #fff;
+  background: var(--accent-gradient);
+  box-shadow: 0 8px 18px -8px rgb(10 95 143 / 0.6);
+}
+.code {
+  color: var(--accent-ink);
+}
+.dropoff {
+  margin-top: var(--s-7);
+  display: grid;
+  gap: var(--s-3);
+}
+
+// Verify
+.verify-grid {
+  display: grid;
+  gap: var(--s-5);
+  align-items: start;
+
+  @include up(md) {
+    grid-template-columns: 0.8fr 1.2fr;
+  }
+}
+
+// Closing CTA
+.cta {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-3);
+  padding: clamp(32px, 6vw, 64px) var(--s-5);
+  border-radius: 36px;
+  text-align: center;
+
+  h2 {
+    font-size: var(--fs-3xl);
+  }
+  .ctas {
+    justify-content: center;
+  }
+}
+.try {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}

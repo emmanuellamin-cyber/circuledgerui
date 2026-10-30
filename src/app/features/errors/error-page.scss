@@ -1,0 +1,28 @@
+.wrap {
+  display: grid;
+  place-items: center;
+  min-height: 60vh;
+  padding-block: var(--s-7);
+}
+.card {
+  max-width: 560px;
+  display: grid;
+  gap: var(--s-3);
+  text-align: center;
+  justify-items: center;
+}
+.badge {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  margin-bottom: var(--s-2);
+  border-radius: 26px;
+  color: #fff;
+  background: var(--accent-gradient);
+  box-shadow: 0 14px 30px -12px rgb(10 95 143 / 0.6);
+}
+.actions {
+  justify-content: center;
+  margin-top: var(--s-3);
+}

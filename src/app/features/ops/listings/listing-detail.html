@@ -1,0 +1,239 @@
+@if (listing.value(); as l) {
+  <page-header
+    [heading]="l.title"
+    [subheading]="
+      l.listingCode + ' · ' + (l.itemType === 'Component' ? 'Part' : 'Refurbished phone')
+    "
+  >
+    <ng-container page-actions>
+      <a glass-button size="sm" routerLink="/ops/listings"
+        ><lucide-icon [img]="i.ArrowLeft" [size]="15" aria-hidden="true" /> Listings</a
+      >
+      @if (isOps() && canEdit()) {
+        <button glass-button type="button" (click)="edit(l)">
+          <lucide-icon [img]="i.Pencil" [size]="15" aria-hidden="true" /> Edit
+        </button>
+      }
+      @if (isOps() && canWithdraw()) {
+        <button glass-button type="button" (click)="withdraw(l)">
+          <lucide-icon [img]="i.Undo2" [size]="15" aria-hidden="true" /> Withdraw
+        </button>
+      }
+      @if (isOps() && canPublish()) {
+        <button
+          glass-button
+          variant="primary"
+          type="button"
+          [disabled]="!hasVerified()"
+          [loading]="lifecycle.busy()"
+          [attr.aria-describedby]="hasVerified() ? null : 'publish-hint'"
+          (click)="publish(l)"
+        >
+          <lucide-icon [img]="i.Send" [size]="15" aria-hidden="true" /> Publish
+        </button>
+      }
+    </ng-container>
+  </page-header>
+
+  @if (lifecycle.error(); as e) {
+    <p class="form-error" role="alert">{{ e }}</p>
+  }
+  @if (canPublish() && !hasVerified()) {
+    <p class="banner info" id="publish-hint">
+      Publish unlocks when at least one photo is verified.
+    </p>
+  }
+
+  <div class="split">
+    <glass-card
+      heading="Photos"
+      subheading="JPEG, PNG or WebP up to 5 MB. A different person from the uploader verifies each photo."
+    >
+      <div class="photos">
+        @for (p of l.photos; track p.id) {
+          <figure class="photo glass">
+            @if (previews()[p.id]; as src) {
+              <img [src]="src" [alt]="'Photo of ' + l.title" loading="lazy" />
+            } @else {
+              <skeleton height="140px" radius="12px" />
+            }
+            <figcaption>
+              @if (p.isVerified) {
+                <span class="ok"
+                  ><lucide-icon [img]="i.BadgeCheck" [size]="15" aria-hidden="true" />
+                  Verified</span
+                >
+              } @else if (isOps()) {
+                <button
+                  glass-button
+                  size="sm"
+                  type="button"
+                  [loading]="verifying() === p.id"
+                  (click)="verify(l, p)"
+                >
+                  Verify
+                </button>
+              } @else {
+                <span class="subtle">Awaiting verification</span>
+              }
+              <span class="subtle tiny">{{ size(p.sizeBytes) }}</span>
+            </figcaption>
+          </figure>
+        }
+        @if (canEdit() || l.status === 'Draft') {
+          <label class="add glass glass--subtle">
+            <input
+              type="file"
+              [accept]="accept"
+              multiple
+              (change)="onFile(l, $event)"
+              [disabled]="upload.busy()"
+            />
+            <lucide-icon [img]="i.ImagePlus" [size]="26" aria-hidden="true" />
+            <span>{{ upload.busy() ? 'Uploading…' : 'Add photos' }}</span>
+          </label>
+        }
+      </div>
+      @if (upload.error(); as e) {
+        <p class="form-error" role="alert">{{ e }}</p>
+      }
+      <p class="subtle tiny hint">
+        You can't verify a photo you uploaded yourself (Admins excepted); the API returns "not
+        allowed" if you try.
+      </p>
+    </glass-card>
+
+    <glass-card heading="Listing">
+      <status-pill card-actions [status]="l.status" />
+      <dl class="dl">
+        <div>
+          <dt>Price</dt>
+          <dd class="num big">{{ money(l.priceSle) }}</dd>
+        </div>
+        <div>
+          <dt>Grade</dt>
+          <dd>{{ l.condition }}</dd>
+        </div>
+        <div>
+          <dt>Warranty</dt>
+          <dd>{{ l.warrantyDays }} days</dd>
+        </div>
+        <div>
+          <dt>Brand / model</dt>
+          <dd>{{ l.brand }} {{ l.model ?? '' }}</dd>
+        </div>
+        @if (l.certificateNumber) {
+          <div class="wide">
+            <dt>Certificate</dt>
+            <dd>
+              <a class="mono" [routerLink]="['/ops/certificates', l.certificateNumber]">{{
+                l.certificateNumber
+              }}</a>
+            </dd>
+          </div>
+        }
+        <div>
+          <dt>Published</dt>
+          <dd>{{ when(l.publishedAt) }}</dd>
+        </div>
+        @if (l.description) {
+          <div class="wide">
+            <dt>Description</dt>
+            <dd class="desc">{{ l.description }}</dd>
+          </div>
+        }
+      </dl>
+      @if (l.status === 'Published') {
+        <p class="links"><a [routerLink]="['/marketplace']">View in marketplace</a></p>
+      }
+    </glass-card>
+  </div>
+} @else if (listing.error()) {
+  <empty-state heading="Listing not found" [message]="errorText()">
+    <a glass-button size="sm" routerLink="/ops/listings">All listings</a>
+  </empty-state>
+} @else {
+  <skeleton [lines]="8" />
+}
+
+<style>
+  .form-error,
+  .banner {
+    margin-bottom: var(--s-3);
+  }
+  .photos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--s-3);
+  }
+  .photo {
+    margin: 0;
+    padding: 6px;
+    border-radius: var(--r-md);
+    display: grid;
+    gap: 6px;
+  }
+  .photo img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+  figcaption {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    min-height: 36px;
+    padding: 0 4px;
+  }
+  .ok {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--success);
+  }
+  .add {
+    position: relative;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 6px;
+    min-height: 190px;
+    border-radius: var(--r-md);
+    color: var(--accent-ink);
+    font-weight: 600;
+    font-size: var(--fs-sm);
+    cursor: pointer;
+    border: 2px dashed var(--field-border);
+  }
+  .add input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .add:has(input:focus-visible) {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  .tiny {
+    font-size: var(--fs-xs);
+  }
+  .hint {
+    margin-top: var(--s-3);
+  }
+  .big {
+    font-size: var(--fs-xl);
+  }
+  .desc {
+    white-space: pre-wrap;
+    font-weight: 400;
+  }
+  .links {
+    margin-top: var(--s-4);
+    font-size: var(--fs-sm);
+  }
+</style>

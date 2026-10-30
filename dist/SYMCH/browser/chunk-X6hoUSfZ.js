@@ -1,0 +1,1 @@
+import{at as R,er as z}from"./chunk-BAfOJpTl.js";var n=class e{detail=z(null);static ɵfac=function(o){return new(o||e)};static ɵprov=R({token:e,factory:e.ɵfac,providedIn:`root`})};export{n as t};

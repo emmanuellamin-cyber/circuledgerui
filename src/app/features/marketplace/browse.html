@@ -1,0 +1,143 @@
+<header class="head">
+  <div>
+    <h1>Refurbished phones & parts</h1>
+    <p class="muted">
+      Every phone is data-wiped with a signed certificate you can check, and comes with a warranty.
+    </p>
+  </div>
+</header>
+
+<form
+  class="filter-bar glass"
+  role="search"
+  aria-label="Filter the marketplace"
+  (submit)="$event.preventDefault()"
+>
+  <glass-input
+    label="Search"
+    placeholder="Galaxy, screen, Tecno…"
+    [formControl]="search"
+    autocomplete="off"
+    type="search"
+  />
+  <glass-select label="Type" [options]="typeOptions" [formControl]="itemType" />
+  @if (q.value().itemType === 'Component') {
+    <glass-select label="Part" [options]="partOptions" [formControl]="componentType" />
+  }
+  <glass-input label="Brand" placeholder="Samsung" [formControl]="brand" autocomplete="off" />
+  <glass-select label="Grade" [options]="gradeOptions" [formControl]="condition" />
+  <glass-input
+    label="Min SLE"
+    type="number"
+    inputmode="numeric"
+    [formControl]="minPrice"
+    [min]="0"
+  />
+  <glass-input
+    label="Max SLE"
+    type="number"
+    inputmode="numeric"
+    [formControl]="maxPrice"
+    [min]="0"
+  />
+  <glass-select label="Sort" [options]="sortOptions" [formControl]="sort" />
+  <div class="fb-actions">
+    <glass-switch label="Samsung only" [formControl]="samsung" />
+    @if (filtered()) {
+      <button type="button" class="link-btn" (click)="clear()">Clear</button>
+    }
+  </div>
+</form>
+
+<div [attr.aria-busy]="list.isLoading()" aria-live="polite">
+  @if (list.isLoading() && !list.value()) {
+    <div class="grid">
+      @for (n of [1, 2, 3, 4, 5, 6]; track n) {
+        <div class="card glass">
+          <skeleton height="180px" radius="16px" /><skeleton [lines]="2" />
+        </div>
+      }
+    </div>
+  } @else if (list.error()) {
+    <div class="form-error" role="alert">
+      {{ errorText() }}
+      <button glass-button size="sm" type="button" (click)="list.reload()">Retry</button>
+    </div>
+  } @else if (list.value()?.items?.length) {
+    <p class="subtle count num">
+      {{ list.value()!.totalCount }} item{{ list.value()!.totalCount === 1 ? '' : 's' }}
+    </p>
+    <ul class="grid">
+      @for (l of list.value()!.items; track l.id) {
+        <li class="card glass" liquid>
+          <a
+            class="link"
+            [routerLink]="['/marketplace/listing', l.id]"
+            [attr.aria-label]="l.title + ', ' + money(l.priceSle)"
+          >
+            <div class="media">
+              @if (photo(l); as src) {
+                <img [src]="src" [alt]="''" loading="lazy" width="400" height="300" />
+              } @else {
+                <span class="ph" aria-hidden="true"
+                  ><lucide-icon [img]="i.Smartphone" [size]="40"
+                /></span>
+              }
+              <span class="grade" aria-hidden="true">Grade {{ l.condition }}</span>
+            </div>
+          </a>
+          <div class="body">
+            <h2 class="title">
+              <a [routerLink]="['/marketplace/listing', l.id]">{{ l.title }}</a>
+            </h2>
+            <p class="price num">{{ money(l.priceSle) }}</p>
+            <p class="meta subtle">
+              {{ l.brand }}{{ l.model ? ' ' + l.model : '' }} · {{ l.warrantyDays }}-day warranty ·
+              Grade {{ l.condition }}
+            </p>
+            @if (l.certificateNumber) {
+              <p class="trust">
+                <lucide-icon [img]="i.BadgeCheck" [size]="15" aria-hidden="true" /> Data securely
+                wiped · <span class="mono">{{ l.certificateNumber }}</span>
+              </p>
+            }
+            <button
+              glass-button
+              [variant]="cart.has(l.id) ? 'secondary' : 'primary'"
+              type="button"
+              [block]="true"
+              [disabled]="cart.has(l.id)"
+              (click)="add(l)"
+            >
+              <lucide-icon [img]="i.ShoppingBag" [size]="16" aria-hidden="true" />
+              {{ cart.has(l.id) ? 'In your cart' : 'Add to cart' }}
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+    <glass-paginator
+      [page]="list.value()!.page"
+      [pageSize]="list.value()!.pageSize"
+      [total]="list.value()!.totalCount"
+      [pages]="list.value()!.totalPages"
+      (pageChange)="q.setPage($event)"
+    />
+  } @else {
+    <glass-card>
+      <empty-state
+        [heading]="filtered() ? 'Nothing matches these filters' : 'No items for sale yet'"
+        [message]="
+          filtered()
+            ? 'Try a wider price range or clear the filters.'
+            : 'Refurbished phones appear here as soon as they are certified and listed.'
+        "
+        [icon]="i.PackageSearch"
+      >
+        @if (filtered()) {
+          <button glass-button size="sm" type="button" (click)="clear()">Clear filters</button>
+        }
+      </empty-state>
+    </glass-card>
+  }
+</div>

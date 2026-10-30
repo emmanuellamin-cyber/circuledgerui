@@ -1,0 +1,6 @@
+{
+  "/api": { "target": "http://localhost:8080", "secure": false, "changeOrigin": true, "logLevel": "warn" },
+  "/health": { "target": "http://localhost:8080", "secure": false, "changeOrigin": true },
+  "/openapi": { "target": "http://localhost:8080", "secure": false, "changeOrigin": true },
+  "/swagger": { "target": "http://localhost:8080", "secure": false, "changeOrigin": true }
+}

@@ -1,0 +1,53 @@
+// Shared mixins for component styles: `@use 'mixins' as *;`
+
+@mixin focus-ring($offset: 2px) {
+  outline: 2px solid var(--focus);
+  outline-offset: $offset;
+}
+
+@mixin glass-surface($fill: var(--glass-fill), $radius: var(--r-lg)) {
+  position: relative;
+  isolation: isolate;
+  background: $fill;
+  border-radius: $radius;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  box-shadow:
+    inset 0 0 0 1px var(--glass-rim),
+    0 0 0 1px var(--glass-edge),
+    var(--glass-shadow);
+}
+
+@mixin sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@mixin up($bp) {
+  @if $bp == sm {
+    @media (min-width: 600px) {
+      @content;
+    }
+  } @else if $bp == md {
+    @media (min-width: 900px) {
+      @content;
+    }
+  } @else if $bp == lg {
+    @media (min-width: 1200px) {
+      @content;
+    }
+  }
+}
+
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}

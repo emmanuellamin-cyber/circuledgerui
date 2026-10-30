@@ -1,0 +1,288 @@
+<page-header
+  heading="Dispatch planner"
+  subheading="Group pending pickups that have coordinates into batches and assign them to field agents."
+/>
+
+<div class="split">
+  <div class="stack">
+    <glass-card padding="sm">
+      <div class="row between">
+        <h2 class="h">Batches</h2>
+        <div class="row filters">
+          <glass-select label="Status" [options]="statusOptions" [formControl]="statusFilter" />
+          @if (agentOptions().length) {
+            <glass-select
+              label="Agent"
+              [options]="agentFilterOptions()"
+              [formControl]="agentFilter"
+            />
+          }
+        </div>
+      </div>
+      <div [attr.aria-busy]="batches.isLoading()">
+        @if (batches.isLoading() && !batches.value()) {
+          <skeleton [lines]="5" height="22px" />
+        } @else if (batches.error()) {
+          <div class="form-error" role="alert">
+            {{ errorText() }}
+            <button glass-button size="sm" type="button" (click)="batches.reload()">Retry</button>
+          </div>
+        } @else if (batches.value()?.items?.length) {
+          <table class="data">
+            <caption class="sr-only">
+              Dispatch batches
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Batch</th>
+                <th scope="col">Agent</th>
+                <th scope="col">Scheduled</th>
+                <th scope="col">Transport</th>
+                <th scope="col" class="r">Pickups</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (b of batches.value()!.items; track b.id) {
+                <tr class="clickable" [class.sel]="q.value().selected === b.id" (click)="select(b)">
+                  <td data-label="Batch">
+                    <button
+                      type="button"
+                      class="link-btn mono"
+                      (click)="select(b); $event.stopPropagation()"
+                    >
+                      {{ b.batchCode }}
+                    </button>
+                  </td>
+                  <td data-label="Agent">{{ b.fieldAgentName ?? '—' }}</td>
+                  <td data-label="Scheduled">{{ date(b.scheduledFor) }}</td>
+                  <td data-label="Transport">{{ b.transportMode }} · {{ km(b.spreadKm) }}</td>
+                  <td data-label="Pickups" class="r num">
+                    {{ collected(b) }}/{{ b.pickups.length }}
+                  </td>
+                  <td data-label="Status"><status-pill [status]="b.status" /></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <glass-paginator
+            [page]="batches.value()!.page"
+            [pageSize]="batches.value()!.pageSize"
+            [total]="batches.value()!.totalCount"
+            [pages]="batches.value()!.totalPages"
+            (pageChange)="q.setPage($event)"
+          />
+        } @else {
+          <empty-state
+            heading="No batches yet"
+            message="Generate batches from pending pickups using the form."
+            [icon]="i.Route"
+          />
+        }
+      </div>
+    </glass-card>
+
+    @if (q.value().selected) {
+      <glass-card variant="strong" [attr.aria-busy]="selected.isLoading()">
+        @if (selected.value(); as b) {
+          <div class="row between">
+            <div>
+              <p class="eyebrow">Batch</p>
+              <h2 class="h mono">{{ b.batchCode }}</h2>
+            </div>
+            <button type="button" class="x" aria-label="Close batch" (click)="close()">
+              <lucide-icon [img]="i.X" [size]="18" />
+            </button>
+          </div>
+          <dl class="dl">
+            <div>
+              <dt>Agent</dt>
+              <dd>{{ b.fieldAgentName ?? b.fieldAgentUserId }}</dd>
+            </div>
+            <div>
+              <dt>Scheduled</dt>
+              <dd>{{ date(b.scheduledFor) }}</dd>
+            </div>
+            <div>
+              <dt>Transport</dt>
+              <dd>{{ b.transportMode }}</dd>
+            </div>
+            <div>
+              <dt>Spread / radius</dt>
+              <dd class="num">{{ km(b.spreadKm) }} / {{ km(b.radiusKm) }}</dd>
+            </div>
+            <div>
+              <dt>Centre</dt>
+              <dd class="num">
+                {{ b.centroidLatitude.toFixed(4) }}, {{ b.centroidLongitude.toFixed(4) }}
+              </dd>
+            </div>
+            <div>
+              <dt>Status</dt>
+              <dd><status-pill [status]="b.status" /></dd>
+            </div>
+          </dl>
+          <h3 class="sub">Pickups</h3>
+          <ul class="pickups">
+            @for (p of b.pickups; track p.intakeRequestId) {
+              <li class="glass">
+                <div>
+                  <strong class="mono">{{ p.referenceCode }}</strong>
+                  <span class="subtle"> · {{ p.brand }}, {{ conditionLabels[p.condition] }}</span>
+                  <div class="subtle tiny">
+                    {{ p.pickupArea ?? '—' }} · {{ p.citizenPhoneMasked }}
+                  </div>
+                </div>
+                <status-pill [status]="p.status" />
+              </li>
+            }
+          </ul>
+          <p class="subtle tiny">
+            Seller phone numbers are only revealed to the assigned agent in the field app.
+          </p>
+        } @else {
+          <skeleton [lines]="5" />
+        }
+      </glass-card>
+    }
+  </div>
+
+  <glass-card
+    heading="Generate batches"
+    subheading="All fields are optional; defaults come from the API."
+  >
+    <form [formGroup]="form" (ngSubmit)="generate()" class="form-grid">
+      <glass-input
+        label="Radius (km)"
+        type="number"
+        step="0.1"
+        formControlName="radiusKm"
+        hint="0.1–50, default 3"
+      />
+      <glass-input
+        label="Max per batch"
+        type="number"
+        formControlName="maxPerBatch"
+        hint="1–50, default 10"
+      />
+      <glass-select
+        label="Transport"
+        formControlName="transportMode"
+        [options]="transportOptions"
+      />
+      <glass-input
+        label="Scheduled for"
+        type="date"
+        formControlName="scheduledFor"
+        hint="Default tomorrow"
+      />
+      <div class="full">
+        @if (agentsUnavailable()) {
+          <p class="banner info">
+            Batches are shared across all active field agents (choosing agents needs the Admin user
+            list).
+          </p>
+        } @else {
+          <checkbox-group
+            label="Field agents"
+            formControlName="fieldAgentIds"
+            [options]="agentOptions()"
+            hint="None selected = all active agents, least-loaded first."
+            emptyText="No active field agents."
+          />
+        }
+      </div>
+      @if (action.error(); as e) {
+        <p class="form-error full" role="alert">{{ e }}</p>
+      }
+      <div class="full">
+        <button glass-button variant="primary" type="submit" [loading]="action.busy()">
+          <lucide-icon [img]="i.Wand2" [size]="16" aria-hidden="true" /> Generate batches
+        </button>
+      </div>
+    </form>
+
+    @if (result(); as r) {
+      <div class="result" aria-live="polite">
+        <p class="banner ok">
+          {{ r.batches.length }} batch{{ r.batches.length === 1 ? '' : 'es' }} created with
+          {{ r.requestsBatched }} pickup{{ r.requestsBatched === 1 ? '' : 's' }}. Sellers were SMS'd
+          their pickup date.
+        </p>
+        @if (r.unlocatedRequests > 0) {
+          <p class="banner warn">
+            <lucide-icon [img]="i.TriangleAlert" [size]="16" aria-hidden="true" />
+            <span
+              >{{ r.unlocatedRequests }} pending pickup{{
+                r.unlocatedRequests === 1 ? ' has' : 's have'
+              }}
+              no location and {{ r.unlocatedRequests === 1 ? 'was' : 'were' }} skipped.
+              <a routerLink="/ops/intake/unlocated">Set locations</a></span
+            >
+          </p>
+        }
+      </div>
+    }
+  </glass-card>
+</div>
+
+<style>
+  .stack {
+    --stack-gap: var(--s-4);
+  }
+  .between {
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: var(--s-3);
+  }
+  .filters {
+    --row-gap: var(--s-2);
+  }
+  .filters > * {
+    min-width: 160px;
+  }
+  .h {
+    font-size: var(--fs-lg);
+  }
+  .sub {
+    margin: var(--s-4) 0 var(--s-2);
+  }
+  tr.sel {
+    background: var(--accent-soft);
+  }
+  .x {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--neutral-bg);
+    color: var(--text-1);
+    cursor: pointer;
+  }
+  .pickups {
+    list-style: none;
+    margin: 0 0 var(--s-2);
+    padding: 0;
+    display: grid;
+    gap: var(--s-2);
+  }
+  .pickups li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--s-2);
+    padding: var(--s-3);
+    border-radius: var(--r-md);
+    font-size: var(--fs-sm);
+  }
+  .tiny {
+    font-size: var(--fs-xs);
+  }
+  .result {
+    display: grid;
+    gap: var(--s-2);
+    margin-top: var(--s-4);
+  }
+</style>

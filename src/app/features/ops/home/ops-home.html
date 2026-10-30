@@ -1,0 +1,225 @@
+<page-header
+  heading="Operations"
+  [subheading]="
+    kpis.value()
+      ? 'Updated ' + date(kpis.value()!.generatedAt)
+      : 'Pilot progress, money and integrity at a glance.'
+  "
+>
+  <ng-container page-actions>
+    <button
+      glass-button
+      type="button"
+      size="sm"
+      (click)="kpis.reload(); intake.reload(); sales.reload()"
+      [loading]="kpis.isLoading()"
+    >
+      <lucide-icon [img]="i.RefreshCw" [size]="15" aria-hidden="true" /> Refresh
+    </button>
+    <a glass-button variant="primary" size="sm" routerLink="/ops/reports">Reports</a>
+  </ng-container>
+</page-header>
+
+<!-- Integrity badge -->
+<div class="integrity" aria-live="polite">
+  @if (integrity.isLoading()) {
+    <span class="badge glass glass--subtle"
+      ><span class="spin" aria-hidden="true"></span> Verifying ledger hash chain…</span
+    >
+  } @else if (integrity.value(); as v) {
+    @if (v.isValid) {
+      <span class="badge glass ok">
+        <lucide-icon [img]="i.ShieldCheck" [size]="17" aria-hidden="true" />
+        Ledger integrity verified · <span class="num">{{ num(v.entriesChecked) }}</span> entries
+      </span>
+    } @else {
+      <span class="badge glass bad" role="alert">
+        <lucide-icon [img]="i.Link2" [size]="17" aria-hidden="true" />
+        Ledger chain broken at #{{ v.firstBrokenSequence }}: {{ v.reason }}
+      </span>
+    }
+  } @else if (integrity.error()) {
+    <span class="badge glass bad">Couldn't verify the ledger.</span>
+  }
+  <button
+    type="button"
+    class="link-btn"
+    (click)="integrity.reload()"
+    [disabled]="integrity.isLoading()"
+  >
+    Check again
+  </button>
+</div>
+
+@if (kpis.error()) {
+  <div class="form-error" role="alert">
+    {{ errorText() }}
+    <button glass-button size="sm" type="button" (click)="kpis.reload()">Retry</button>
+  </div>
+}
+
+<!-- Targets -->
+<section aria-labelledby="targets-h" class="block">
+  <h2 id="targets-h" class="h">Pilot targets</h2>
+  <div class="rings" [attr.aria-busy]="kpis.isLoading()">
+    @if (kpis.isLoading() && !kpis.value()) {
+      @for (n of [1, 2, 3, 4, 5, 6, 7, 8]; track n) {
+        <div class="ring-card glass">
+          <skeleton [circle]="true" width="72px" height="72px" /><skeleton [lines]="2" />
+        </div>
+      }
+    }
+    @for (r of rings(); track r.label) {
+      <div class="ring-card glass" [class.good]="r.good">
+        <progress-ring [value]="r.percent" [size]="76" [stroke]="7" [label]="r.label" />
+        <div class="ring-text">
+          <span class="ring-label">{{ r.label }}</span>
+          <strong class="num">{{ r.value }}</strong>
+          <span class="ring-cap"
+            >{{ r.caption }}
+            @if (r.good !== undefined) {
+              · {{ r.good ? 'on target' : 'below target' }}
+            }
+          </span>
+        </div>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Money and activity -->
+@if (kpis.value(); as k) {
+  <section aria-labelledby="money-h" class="block">
+    <h2 id="money-h" class="h">Money and activity</h2>
+    <div class="kpi-grid">
+      <stat-tile
+        label="Seed Fund balance"
+        [value]="money(k.seedFundBalanceSle)"
+        caption="available to buy phones"
+        [icon]="i.Coins"
+      />
+      <stat-tile
+        label="Training Fund balance"
+        [value]="money(k.trainingFundBalanceSle)"
+        caption="for youth training"
+        [icon]="i.Coins"
+      />
+      <stat-tile
+        label="Device purchases"
+        [value]="money(k.devicePurchasesSle)"
+        caption="paid to sellers"
+        [icon]="i.HandCoins"
+      />
+      <stat-tile
+        label="Marketplace revenue"
+        [value]="money(k.marketplaceRevenueSle)"
+        [caption]="num(k.ordersPaid) + ' orders paid'"
+        [icon]="i.Store"
+      />
+      <stat-tile
+        label="Reinvested"
+        [value]="money(k.totalReinvestedSle)"
+        caption="from sales into the funds"
+        [icon]="i.Coins"
+      />
+      <stat-tile
+        label="Open intake requests"
+        [value]="num(k.intakeRequestsOpen)"
+        caption="awaiting collection or receipt"
+        [icon]="i.Inbox"
+      />
+      <stat-tile
+        label="Certificates issued"
+        [value]="num(k.certificatesIssued)"
+        [caption]="num(k.percentSanitized, 1) + '% of purchased phones wiped'"
+        [icon]="i.ShieldCheck"
+        [percent]="k.percentSanitized"
+      />
+      <stat-tile
+        label="Samsung share"
+        [value]="num(k.samsungSharePercent, 1) + '%'"
+        caption="of devices collected"
+        [subtle]="true"
+      />
+      <stat-tile
+        label="Components recovered"
+        [value]="num(k.componentsRecovered)"
+        caption="parts in the system"
+        [subtle]="true"
+      />
+      <stat-tile
+        label="Refurbished phones sold"
+        [value]="num(k.refurbishedDevicesSold)"
+        caption="second lives"
+        [subtle]="true"
+      />
+      <stat-tile
+        label="People reached"
+        [value]="num(k.awarenessPeopleReached)"
+        caption="by awareness campaigns"
+        [subtle]="true"
+      />
+    </div>
+  </section>
+}
+
+<!-- Trends: one measure per chart, never dual-axis -->
+<section aria-labelledby="trends-h" class="block">
+  <h2 id="trends-h" class="h">Last 12 weeks</h2>
+  <div class="two-col">
+    <glass-card
+      heading="Intake"
+      [subheading]="
+        intakeMeasure() === 'count' ? 'Devices received per week' : 'Purchase spend per week (SLE)'
+      "
+    >
+      <glass-tabs
+        card-actions
+        [tabs]="intakeTabs"
+        [(selected)]="intakeMeasure"
+        ariaLabel="Intake measure"
+      />
+      @if (intake.isLoading() && !intake.value()) {
+        <skeleton height="220px" radius="16px" />
+      } @else if (intake.error()) {
+        <p class="form-error">Couldn't load the intake series.</p>
+      } @else {
+        <glass-chart
+          [points]="intakePoints()"
+          kind="bar"
+          [ariaLabel]="
+            intakeMeasure() === 'count' ? 'Devices received per week' : 'Purchase spend per week'
+          "
+          [yLabel]="intakeMeasure() === 'count' ? 'Devices' : 'Spend'"
+          [format]="intakeMeasure() === 'count' ? int : sle"
+        />
+      }
+    </glass-card>
+    <glass-card
+      heading="Sales"
+      [subheading]="
+        salesMeasure() === 'value' ? 'Marketplace revenue per week (SLE)' : 'Paid orders per week'
+      "
+    >
+      <glass-tabs
+        card-actions
+        [tabs]="salesTabs"
+        [(selected)]="salesMeasure"
+        ariaLabel="Sales measure"
+      />
+      @if (sales.isLoading() && !sales.value()) {
+        <skeleton height="220px" radius="16px" />
+      } @else if (sales.error()) {
+        <p class="form-error">Couldn't load the sales series.</p>
+      } @else {
+        <glass-chart
+          [points]="salesPoints()"
+          [kind]="salesMeasure() === 'value' ? 'line' : 'bar'"
+          [ariaLabel]="salesMeasure() === 'value' ? 'Revenue per week' : 'Paid orders per week'"
+          [yLabel]="salesMeasure() === 'value' ? 'Revenue' : 'Orders'"
+          [format]="salesMeasure() === 'value' ? sle : int"
+        />
+      }
+    </glass-card>
+  </div>
+</section>

@@ -1,0 +1,294 @@
+<page-header
+  heading="Intake inbox"
+  subheading="Every offer to sell a phone: USSD, SMS, web and walk-ins."
+>
+  <ng-container page-actions>
+    <button glass-button type="button" (click)="walkIn()">
+      <lucide-icon [img]="i.UserRoundPlus" [size]="16" aria-hidden="true" /> Walk-in
+    </button>
+    <button glass-button variant="primary" type="button" (click)="newRequest()">
+      <lucide-icon [img]="i.Plus" [size]="16" aria-hidden="true" /> New request
+    </button>
+  </ng-container>
+</page-header>
+
+<form
+  class="filter-bar glass"
+  role="search"
+  aria-label="Filter intake requests"
+  (submit)="$event.preventDefault()"
+>
+  <glass-input label="Reference" placeholder="SY56JDVN" [formControl]="ref" autocomplete="off" />
+  <glass-select label="Status" [options]="statusOptions" [formControl]="status" />
+  <glass-select label="Fulfilment" [options]="methodOptions" [formControl]="method" />
+  <glass-select label="Channel" [options]="channelOptions" [formControl]="channel" />
+  <div class="fb-actions">
+    <button
+      type="button"
+      class="link-btn"
+      (click)="q.set({ status: 'Pending', fulfilmentMethod: 'Pickup' })"
+    >
+      Awaiting pickup
+    </button>
+    @if (filtered()) {
+      <button type="button" class="link-btn" (click)="clearFilters()">Clear</button>
+    }
+  </div>
+</form>
+
+<div class="split">
+  <glass-card padding="sm">
+    <div class="table-wrap" [attr.aria-busy]="list.isLoading()">
+      @if (list.isLoading() && !list.value()) {
+        <skeleton [lines]="8" height="22px" />
+      } @else if (list.error()) {
+        <div class="form-error" role="alert">
+          {{ errorText() }}
+          <button glass-button size="sm" type="button" (click)="list.reload()">Retry</button>
+        </div>
+      } @else if (list.value()?.items?.length) {
+        <table class="data">
+          <caption class="sr-only">
+            Intake requests, newest first
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Reference</th>
+              <th scope="col">Phone</th>
+              <th scope="col">Channel</th>
+              <th scope="col">Fulfilment</th>
+              <th scope="col" class="r">Offer</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of list.value()!.items; track r.id) {
+              <tr class="clickable" [class.sel]="q.value().selected === r.id" (click)="select(r)">
+                <td data-label="Reference">
+                  <button
+                    type="button"
+                    class="link-btn mono"
+                    (click)="select(r); $event.stopPropagation()"
+                  >
+                    {{ r.referenceCode }}
+                  </button>
+                  <div class="subtle tiny">{{ ago(r.createdAt) }}</div>
+                </td>
+                <td data-label="Phone">
+                  {{ r.brand }}{{ r.model ? ' ' + r.model : '' }}
+                  <div class="subtle tiny">{{ conditionLabels[r.reportedCondition] }}</div>
+                </td>
+                <td data-label="Channel">{{ channelLabels[r.channel] }}</td>
+                <td data-label="Fulfilment">
+                  {{ fulfilmentLabels[r.fulfilmentMethod] }}
+                  <div class="subtle tiny">
+                    {{ r.fulfilmentMethod === 'DropOff' ? r.dropOffPointName : r.pickupArea }}
+                  </div>
+                </td>
+                <td data-label="Offer" class="r num">{{ money(r.estimatedOfferSle) }}</td>
+                <td data-label="Status"><status-pill [status]="r.status" /></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <glass-paginator
+          [page]="list.value()!.page"
+          [pageSize]="list.value()!.pageSize"
+          [total]="list.value()!.totalCount"
+          [pages]="list.value()!.totalPages"
+          (pageChange)="q.setPage($event)"
+        />
+      } @else {
+        <empty-state
+          [heading]="filtered() ? 'No requests match these filters' : 'No sell requests yet'"
+          [message]="
+            filtered()
+              ? 'Try clearing a filter.'
+              : 'Requests appear here when sellers dial the USSD code, send an SMS, or staff add them.'
+          "
+          [icon]="i.Inbox"
+        >
+          @if (filtered()) {
+            <button glass-button size="sm" type="button" (click)="clearFilters()">
+              Clear filters
+            </button>
+          } @else {
+            <button glass-button size="sm" variant="primary" type="button" (click)="newRequest()">
+              New request
+            </button>
+          }
+        </empty-state>
+      }
+    </div>
+  </glass-card>
+
+  @if (q.value().selected) {
+    <glass-card variant="strong" class="detail" [attr.aria-busy]="selected.isLoading()">
+      @if (selected.value(); as r) {
+        <header class="dhead">
+          <div>
+            <p class="eyebrow">Intake request</p>
+            <h2 class="mono">{{ r.referenceCode }}</h2>
+          </div>
+          <button type="button" class="x" aria-label="Close details" (click)="close()">
+            <lucide-icon [img]="i.X" [size]="18" />
+          </button>
+        </header>
+        <status-pill [status]="r.status" />
+        <dl class="dl dmeta">
+          <div>
+            <dt>Phone</dt>
+            <dd>{{ r.brand }}{{ r.model ? ' ' + r.model : '' }}</dd>
+          </div>
+          <div>
+            <dt>Condition</dt>
+            <dd>{{ conditionLabels[r.reportedCondition] }}</dd>
+          </div>
+          <div>
+            <dt>Seller</dt>
+            <dd class="mono">{{ r.citizenPhoneMasked }}</dd>
+          </div>
+          <div>
+            <dt>Channel</dt>
+            <dd>{{ channelLabels[r.channel] }}</dd>
+          </div>
+          <div>
+            <dt>Estimated offer</dt>
+            <dd class="num">{{ money(r.estimatedOfferSle) }}</dd>
+          </div>
+          <div>
+            <dt>{{ r.fulfilmentMethod === 'DropOff' ? 'Drop-off point' : 'Pickup area' }}</dt>
+            <dd>
+              {{ (r.fulfilmentMethod === 'DropOff' ? r.dropOffPointName : r.pickupArea) ?? '—' }}
+            </dd>
+          </div>
+          @if (r.fulfilmentMethod === 'Pickup') {
+            <div>
+              <dt>Coordinates</dt>
+              <dd class="num">
+                {{
+                  r.pickupLatitude !== null
+                    ? r.pickupLatitude + ', ' + r.pickupLongitude
+                    : 'Not set'
+                }}
+              </dd>
+            </div>
+          }
+          <div>
+            <dt>Created</dt>
+            <dd>{{ when(r.createdAt) }}</dd>
+          </div>
+          @if (r.scheduledAt) {
+            <div>
+              <dt>Scheduled</dt>
+              <dd>{{ when(r.scheduledAt) }}</dd>
+            </div>
+          }
+          @if (r.collectedAt) {
+            <div>
+              <dt>Collected</dt>
+              <dd>{{ when(r.collectedAt) }}</dd>
+            </div>
+          }
+          @if (r.receivedAt) {
+            <div>
+              <dt>Received</dt>
+              <dd>{{ when(r.receivedAt) }}</dd>
+            </div>
+          }
+          @if (r.closedReason) {
+            <div class="wide">
+              <dt>Reason</dt>
+              <dd>{{ r.closedReason }}</dd>
+            </div>
+          }
+        </dl>
+
+        @if (needsLocation(r)) {
+          <p class="banner warn">
+            <lucide-icon [img]="i.MapPinOff" [size]="16" aria-hidden="true" />
+            <span
+              >No coordinates, so batching skips it.
+              <a routerLink="/ops/intake/unlocated">Set location</a></span
+            >
+          </p>
+        }
+        @if (r.status === 'Scheduled') {
+          <p class="banner info">
+            Assigned to a dispatch batch. The field agent calls the seller and marks it collected.
+          </p>
+        }
+
+        <div class="row dactions">
+          @if (canReceive(r)) {
+            <button glass-button variant="primary" type="button" (click)="receive(r)">
+              Receive at hub
+            </button>
+          }
+          @if (r.status === 'Received' && r.deviceTrackingId) {
+            <button
+              glass-button
+              variant="primary"
+              type="button"
+              (click)="openDevice(r.deviceTrackingId)"
+            >
+              Go to device {{ r.deviceTrackingId }}
+            </button>
+          }
+          @if (canClose(r)) {
+            <button glass-button type="button" (click)="closeRequest(r, 'cancel')">Cancel</button>
+            <button glass-button variant="danger" type="button" (click)="closeRequest(r, 'reject')">
+              Reject
+            </button>
+          }
+        </div>
+      } @else if (selected.error()) {
+        <p class="form-error">Couldn't load this request.</p>
+        <button type="button" class="link-btn" (click)="close()">Close</button>
+      } @else {
+        <skeleton [lines]="6" />
+      }
+    </glass-card>
+  }
+</div>
+
+<style>
+  .tiny {
+    font-size: var(--fs-xs);
+  }
+  tr.sel {
+    background: var(--accent-soft);
+  }
+  .detail {
+    position: sticky;
+    top: 150px;
+    display: grid;
+    gap: var(--s-3);
+  }
+  .dhead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--s-2);
+  }
+  .dhead h2 {
+    font-size: var(--fs-xl);
+  }
+  .x {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--neutral-bg);
+    color: var(--text-1);
+    cursor: pointer;
+  }
+  .dmeta {
+    margin-top: var(--s-2);
+  }
+  .dactions {
+    margin-top: var(--s-2);
+  }
+</style>

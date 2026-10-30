@@ -1,0 +1,178 @@
+<section class="container section">
+  <div class="section-head">
+    <p class="eyebrow">CircuLedger UI</p>
+    <h1>Liquid Glass design system</h1>
+    <p>
+      Tokens and components used across every workspace. Switch theme, or turn on solid surfaces to
+      check the reduced-transparency fallback.
+    </p>
+    <div class="row">
+      <button glass-button type="button" (click)="theme.cycle()">
+        Theme: {{ theme.preference() }}
+      </button>
+      <button
+        glass-button
+        type="button"
+        [attr.aria-pressed]="theme.solid()"
+        (click)="theme.solid.set(!theme.solid())"
+      >
+        Solid surfaces: {{ theme.solid() ? 'on' : 'off' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <glass-card heading="Colour tokens" subheading="Semantic CSS custom properties, light + dark.">
+      <ul class="swatches">
+        @for (s of swatches; track s.v) {
+          <li>
+            <span class="sw" [style.background]="'var(' + s.v + ')'"></span>
+            <span
+              ><strong>{{ s.name }}</strong
+              ><code>{{ s.v }}</code></span
+            >
+          </li>
+        }
+      </ul>
+    </glass-card>
+
+    <glass-card heading="Typography" subheading="Inter / system stack, tabular numbers for money.">
+      <div class="type">
+        <p class="d">Display</p>
+        <h1>Heading 1</h1>
+        <h2>Heading 2</h2>
+        <h3>Heading 3</h3>
+        <p>Body text for descriptions and helper copy.</p>
+        <p class="muted">Secondary text</p>
+        <p class="num money">{{ 1200 | sle }} · {{ -240 | sle }}</p>
+        <p class="mono">{{ '352099001761481' | masked }} · {{ sampleDate | relativeTime }}</p>
+      </div>
+    </glass-card>
+
+    <glass-card heading="Buttons" subheading="Native button/a with the glass-button attribute.">
+      <div class="row">
+        <button glass-button variant="primary" type="button">Primary</button>
+        <button glass-button type="button">Secondary</button>
+        <button glass-button variant="amber" type="button">Amber</button>
+        <button glass-button variant="ghost" type="button">Ghost</button>
+        <button glass-button variant="danger" type="button">
+          <lucide-icon [img]="i.Trash2" [size]="16" aria-hidden="true" /> Danger
+        </button>
+      </div>
+      <div class="row gap">
+        <button glass-button size="sm" type="button">Small</button>
+        <button glass-button size="lg" variant="primary" type="button">Large</button>
+        <button
+          glass-button
+          variant="primary"
+          type="button"
+          [loading]="loadingDemo()"
+          (click)="pulseLoading()"
+        >
+          Loading state
+        </button>
+        <button glass-button type="button" [disabled]="true">Disabled</button>
+        <button glass-button type="button" [iconOnly]="true" aria-label="Add">
+          <lucide-icon [img]="i.Plus" [size]="18" />
+        </button>
+      </div>
+    </glass-card>
+
+    <glass-card
+      heading="Form fields"
+      subheading="Errors appear after touch; server errors map by field."
+    >
+      <form [formGroup]="form" class="stack">
+        <glass-input
+          label="Email"
+          type="email"
+          formControlName="email"
+          [icon]="i.Mail"
+          placeholder="you@example.com"
+        />
+        <glass-input
+          label="IMEI"
+          formControlName="imei"
+          inputmode="numeric"
+          hint="15 digits, dial *#06# to see it."
+        />
+        <glass-select label="Payout method" formControlName="method" [options]="payoutOptions" />
+      </form>
+    </glass-card>
+
+    <glass-card heading="Tabs" subheading="Arrow keys move between tabs.">
+      <glass-tabs [tabs]="tabs" [(selected)]="tab" ariaLabel="Intake filter" />
+      <p class="muted small">
+        Selected: <strong>{{ tab() }}</strong>
+      </p>
+    </glass-card>
+
+    <glass-card heading="Status pills" subheading="Tone follows the §7 lifecycles.">
+      <div class="row">
+        @for (s of statuses; track s) {
+          <status-pill [status]="s" />
+        }
+      </div>
+    </glass-card>
+
+    <glass-card heading="Overlays" subheading="CDK dialog (focus trap, Esc) and toasts.">
+      <div class="row">
+        <button glass-button type="button" (click)="openModal()">Open modal</button>
+        <button glass-button variant="danger" type="button" (click)="confirmDemo()">
+          Destructive confirm
+        </button>
+      </div>
+      <div class="row gap">
+        <button glass-button size="sm" type="button" (click)="toastDemo('success')">
+          Success toast
+        </button>
+        <button glass-button size="sm" type="button" (click)="toastDemo('error')">
+          Error toast
+        </button>
+        <button glass-button size="sm" type="button" (click)="toastDemo('warning')">
+          429 toast
+        </button>
+        <button glass-button size="sm" type="button" (click)="toastDemo('info')">Info toast</button>
+      </div>
+    </glass-card>
+
+    <glass-card heading="Loading and empty" subheading="Skeletons and a helpful empty state.">
+      <div class="stack" aria-busy="true">
+        <skeleton height="20px" width="50%" />
+        <skeleton [lines]="3" />
+      </div>
+      <empty-state
+        heading="No devices awaiting wipe"
+        message="Scan a tracking ID label to start."
+        [icon]="i.PackageSearch"
+      >
+        <button glass-button size="sm" variant="primary" type="button">Scan device</button>
+      </empty-state>
+    </glass-card>
+  </div>
+
+  <h2 class="sub">KPI tiles</h2>
+  <div class="kpis">
+    <stat-tile
+      label="Devices collected"
+      value="312"
+      caption="of 500 target"
+      [percent]="62.4"
+      [icon]="i.Smartphone"
+    />
+    <stat-tile
+      label="Hazardous diverted"
+      value="18.4 kg"
+      caption="of 50 kg target"
+      [percent]="36.8"
+      [icon]="i.Recycle"
+    />
+    <stat-tile
+      label="Seed Fund balance"
+      [value]="24840 | sle"
+      caption="after purchases"
+      [icon]="i.Coins"
+    />
+    <stat-tile label="Women trainees" value="45%" caption="target ≥ 40%" [percent]="100" />
+  </div>
+</section>

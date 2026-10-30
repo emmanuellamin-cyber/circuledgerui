@@ -1,0 +1,140 @@
+<a class="skip-link" href="#ops-main">Skip to content</a>
+
+@if (drawerOpen()) {
+  <button
+    type="button"
+    class="scrim-btn"
+    aria-label="Close navigation"
+    (click)="drawerOpen.set(false)"
+  ></button>
+}
+
+<aside
+  class="sidebar glass glass--lens"
+  [class.open]="drawerOpen()"
+  aria-label="Operations navigation"
+>
+  <div class="side-head">
+    <a routerLink="/ops" class="brand" aria-label="Operations home">
+      <brand-mark [size]="34" [wordmark]="!collapsed()" />
+    </a>
+    <button
+      type="button"
+      class="icon-btn close-drawer"
+      aria-label="Close navigation"
+      (click)="drawerOpen.set(false)"
+    >
+      <lucide-icon [img]="i.X" [size]="20" />
+    </button>
+  </div>
+
+  <button
+    type="button"
+    class="search-btn"
+    (click)="openPalette()"
+    [attr.aria-label]="'Search (' + (isMac ? '⌘' : 'Ctrl') + '+K)'"
+  >
+    <lucide-icon [img]="i.Search" [size]="17" aria-hidden="true" />
+    <span class="label">Search</span>
+    <kbd class="label">{{ isMac ? '⌘' : 'Ctrl' }} K</kbd>
+  </button>
+
+  <nav class="nav">
+    @for (g of groups(); track g.label) {
+      <div class="group">
+        <p class="group-label label">{{ g.label }}</p>
+        <ul>
+          @for (it of g.items; track it.path) {
+            <li>
+              <a
+                [routerLink]="it.path"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: it.exact ?? false }"
+                ariaCurrentWhenActive="page"
+                [attr.title]="collapsed() ? it.label : null"
+              >
+                <lucide-icon [img]="it.icon" [size]="19" aria-hidden="true" />
+                <span class="label">{{ it.label }}</span>
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </nav>
+
+  <button
+    type="button"
+    class="collapse"
+    (click)="toggleCollapsed()"
+    [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+    [attr.aria-pressed]="collapsed()"
+  >
+    <lucide-icon
+      [img]="collapsed() ? i.ChevronsRight : i.ChevronsLeft"
+      [size]="18"
+      aria-hidden="true"
+    />
+    <span class="label">Collapse</span>
+  </button>
+</aside>
+
+<div class="main">
+  <header class="topbar glass">
+    <button
+      type="button"
+      class="icon-btn menu"
+      aria-label="Open navigation"
+      (click)="drawerOpen.set(true)"
+    >
+      <lucide-icon [img]="i.Menu" [size]="20" />
+    </button>
+    <nav aria-label="Breadcrumb" class="crumbs">
+      <ol>
+        <li><a routerLink="/ops">Operations</a></li>
+        @if (current(); as c) {
+          @if (c.item.path !== '/ops') {
+            <li aria-hidden="true"><lucide-icon [img]="i.ChevronRight" [size]="14" /></li>
+            <li class="group-crumb">{{ c.group.label }}</li>
+            <li aria-hidden="true"><lucide-icon [img]="i.ChevronRight" [size]="14" /></li>
+            <li>
+              <a [routerLink]="c.item.path" [attr.aria-current]="crumbs.detail() ? null : 'page'">{{
+                c.item.label
+              }}</a>
+            </li>
+          }
+        }
+        @if (crumbs.detail(); as d) {
+          <li aria-hidden="true"><lucide-icon [img]="i.ChevronRight" [size]="14" /></li>
+          <li aria-current="page" class="mono">{{ d }}</li>
+        }
+      </ol>
+    </nav>
+    <div class="tools">
+      <span
+        class="health"
+        [class]="'health h-' + health()"
+        role="status"
+        [attr.title]="'API ' + health()"
+      >
+        <span class="dot" aria-hidden="true"></span>
+        <span class="sr-only">API status: {{ health() }}</span>
+        <span class="health-label" aria-hidden="true">API</span>
+      </span>
+      <button
+        type="button"
+        class="icon-btn search-mobile"
+        aria-label="Search"
+        (click)="openPalette()"
+      >
+        <lucide-icon [img]="i.Search" [size]="19" />
+      </button>
+      <theme-toggle />
+      <user-menu />
+    </div>
+  </header>
+
+  <main id="ops-main" tabindex="-1" class="content">
+    <router-outlet />
+  </main>
+</div>

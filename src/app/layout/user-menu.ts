@@ -10,6 +10,7 @@ import {
   LucideIconData,
   ShoppingBag,
   Smartphone,
+  UserRound,
 } from 'lucide-angular';
 import { AuthService } from '../core/auth/auth.service';
 import { ROLE_LABELS, WorkspaceId, primaryRole } from '../core/auth/roles';
@@ -41,6 +42,10 @@ const WORKSPACE_ICONS: Record<WorkspaceId, LucideIconData> = {
           <span class="subtle">{{ auth.user()?.email }}</span>
           <span class="role">{{ roleLabel() }}</span>
         </div>
+        <button type="button" class="item" cdkMenuItem (cdkMenuItemTriggered)="go('/profile')">
+          <lucide-icon [img]="UserRound" [size]="18" aria-hidden="true" />
+          <span class="item-text">My profile</span>
+        </button>
         @if (auth.workspaces().length > 0) {
           <p class="group">Workspaces</p>
           @for (w of auth.workspaces(); track w.id) {
@@ -188,6 +193,7 @@ export class UserMenu {
   protected readonly ChevronDown = ChevronDown;
   protected readonly LogOut = LogOut;
   protected readonly Contrast = Contrast;
+  protected readonly UserRound = UserRound;
 
   protected readonly firstName = computed(() => this.auth.user()?.fullName.split(' ')[0] ?? '');
   protected readonly initials = computed(() =>

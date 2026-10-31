@@ -65,6 +65,13 @@ export class AuthService {
     storage()?.setItem(USER_KEY, JSON.stringify(auth.user));
   }
 
+  /** Replaces the cached profile after a profile edit. Token claims stay old until the next refresh. */
+  updateUser(user: UserProfile): void {
+    if (!this.profile()) return;
+    this.profile.set(user);
+    storage()?.setItem(USER_KEY, JSON.stringify(user));
+  }
+
   clearSession(): void {
     this.token.set(null);
     this.profile.set(null);

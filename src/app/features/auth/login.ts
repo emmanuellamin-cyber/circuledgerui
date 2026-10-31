@@ -62,13 +62,13 @@ const MAX_ATTEMPTS = 5;
           <p class="muted">Staff, buyers and registered sellers sign in here.</p>
         </div>
 
-        @if (reason() === 'expired') {
+        @if (reason() === 'expired' && !locked()) {
           <p class="banner info" role="status">
             <lucide-icon [img]="i.Clock" [size]="18" aria-hidden="true" />
             Your session expired. Please log in again.
           </p>
         }
-        @if (locked()) {
+        @if (locked() || reason() === 'locked') {
           <p class="banner warn" role="alert">
             <lucide-icon [img]="i.Lock" [size]="18" aria-hidden="true" />
             <span>

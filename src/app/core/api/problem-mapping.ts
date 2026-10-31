@@ -62,11 +62,15 @@ export function mapProblemErrors(
  * Applies an `ApiError` to a reactive form: sets `{ server: message }` on matching controls
  * and returns the message(s) to show as a general form error.
  */
-export function applyProblemToForm(form: FormGroup, error: ApiError): string[] {
+export function applyProblemToForm(
+  form: FormGroup,
+  error: ApiError,
+  aliases: Readonly<Record<string, string>> = IDENTITY_ALIASES,
+): string[] {
   if (Object.keys(error.fieldErrors).length === 0) {
     return [error.message];
   }
-  const mapped = mapProblemErrors(error.fieldErrors, Object.keys(form.controls));
+  const mapped = mapProblemErrors(error.fieldErrors, Object.keys(form.controls), aliases);
   for (const [name, message] of Object.entries(mapped.fields)) {
     const control = form.get(name);
     control?.setErrors({ ...(control.errors ?? {}), server: message });

@@ -22,6 +22,14 @@ export function roleGuard(allowed: readonly Role[]): CanActivateFn {
   };
 }
 
+/** Any signed-in user, whatever their role (e.g. "My profile"). */
+export const authGuard: CanActivateFn = (_route, state) => {
+  const auth = inject(AuthService);
+  return auth.isAuthenticated()
+    ? true
+    : inject(Router).createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
+};
+
 /** For /login and /register: a signed-in user is sent to their workspace instead. */
 export const guestGuard: CanActivateFn = () => {
   const auth = inject(AuthService);

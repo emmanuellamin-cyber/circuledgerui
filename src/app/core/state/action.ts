@@ -10,6 +10,8 @@ export interface ActionOptions {
   success?: string;
   /** Validation errors (400) are mapped onto this form; other messages go to `error`. */
   form?: FormGroup;
+  /** Error keys that aren't control names (Identity codes) → control name. */
+  aliases?: Readonly<Record<string, string>>;
   /** Show errors as a toast instead of the inline `error` signal. */
   toastErrors?: boolean;
   /** Per-code friendly messages, e.g. `{ insufficient_funds: '…' }`. Default is `problem.detail`. */
@@ -60,7 +62,7 @@ export function useAction(): Action {
           status.set(e.status);
           if (e.code && opts.messages?.[e.code]) message = opts.messages[e.code];
           if (e.status === 400 && opts.form) {
-            message = applyProblemToForm(opts.form, e).join(' ');
+            message = applyProblemToForm(opts.form, e, opts.aliases).join(' ');
           }
           if (opts.toastErrors) toast.error(e);
         } else if (opts.toastErrors) {

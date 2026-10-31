@@ -43,6 +43,21 @@ export interface UpdateProfileRequest {
   fullName: string;
   gender: Gender;
 }
+/** `PUT /users/me/email` (PROFILE_MANAGEMENT.md) */
+export interface ChangeEmailRequest {
+  newEmail: string;
+  currentPassword: string;
+}
+/** `PUT /users/me/phone` */
+export interface ChangePhoneRequest {
+  phone: string;
+  currentPassword: string;
+}
+/** `PUT /users/me/password`: returns new tokens. */
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
 /** §8.2 `PUT /users/{id}/roles` */
 export interface UpdateRolesRequest {
   roles: Role[];

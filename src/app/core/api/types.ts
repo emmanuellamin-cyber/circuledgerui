@@ -48,7 +48,7 @@ export type LedgerEventType = "IntakeCreated" | "DeviceReceived" | "Purchased" |
   | "Dismantled" | "ComponentRecovered" | "MaterialDiverted" | "Listed" | "Sold" | "Reinvested";
 
 // ---------- auth & users ----------
-export interface UserProfile { id: string; email: string; fullName: string; gender: Gender; roles: Role[]; isActive: boolean; createdAt: IsoDateTime; }
+export interface UserProfile { id: string; email: string; fullName: string; gender: Gender; maskedPhone?: string | null; roles: Role[]; isActive: boolean; createdAt: IsoDateTime; }
 export interface AuthResponse { accessToken: string; accessTokenExpiresAt: IsoDateTime; refreshToken: string; refreshTokenExpiresAt: IsoDateTime; user: UserProfile; }
 export interface RegisterRequest { email: string; password: string; fullName: string; gender?: Gender; accountType?: "Buyer" | "Citizen"; phone?: string | null; }
 export interface LoginRequest { email: string; password: string; }

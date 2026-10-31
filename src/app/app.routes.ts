@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { guestGuard, roleGuard } from './core/auth/guards';
+import { authGuard, guestGuard, roleGuard } from './core/auth/guards';
 import { POLICY } from './core/auth/roles';
 
 const ussdSimulator = () =>
@@ -112,6 +112,14 @@ export const routes: Routes = [
         title: 'My phones · CircuLedger',
         canActivate: [roleGuard(POLICY.Citizen)],
         loadComponent: () => import('./features/citizen/citizen').then((m) => m.CitizenHome),
+      },
+
+      {
+        // Every role manages its own profile here (PROFILE_MANAGEMENT.md).
+        path: 'profile',
+        title: 'My profile · CircuLedger',
+        canActivate: [authGuard],
+        loadComponent: () => import('./features/account/profile').then((m) => m.ProfilePage),
       },
 
       {

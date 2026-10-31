@@ -20,7 +20,9 @@ import { UserMenu } from './user-menu';
   ],
   template: `
     <glass-nav [links]="links">
-      <a nav-brand routerLink="/" class="brand" aria-label="CircuLedger home"><brand-mark /></a>
+      <a nav-brand routerLink="/" class="brand" aria-label="CircuLedger home"
+        ><brand-mark [compactOnPhone]="true"
+      /></a>
       <ng-container nav-actions>
         <theme-toggle />
         @if (auth.isAuthenticated()) {

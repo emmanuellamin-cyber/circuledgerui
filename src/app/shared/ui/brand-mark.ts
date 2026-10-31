@@ -65,9 +65,18 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     .word span {
       color: var(--accent-ink);
     }
+    /* Very narrow phones: icon only, so a signed-in nav bar still fits. */
+    @media (max-width: 359.98px) {
+      :host(.compact-on-phone) .word {
+        display: none;
+      }
+    }
   `,
+  host: { '[class.compact-on-phone]': 'compactOnPhone()' },
 })
 export class BrandMark {
   readonly size = input(34);
   readonly wordmark = input(true);
+  /** Hides the wordmark below 360px. Only use where the mark has an accessible label. */
+  readonly compactOnPhone = input(false);
 }

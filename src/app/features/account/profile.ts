@@ -152,6 +152,10 @@ const GENDERS: SelectOption<Gender>[] = [
     .head h1 {
       font-size: var(--fs-3xl);
     }
+    /* Gender has a hint below it; without this, Full name stretches to the same height. */
+    .form-grid {
+      align-items: start;
+    }
     .actions {
       display: flex;
       justify-content: flex-end;
@@ -186,6 +190,42 @@ const GENDERS: SelectOption<Gender>[] = [
       color: var(--text-1);
       font-weight: 550;
       overflow-wrap: anywhere;
+    }
+    .head h1 {
+      overflow-wrap: anywhere;
+    }
+    /* Phones: the value gets its own line under the label so it isn't squeezed by the button. */
+    @media (max-width: 479.98px) {
+      .head h1 {
+        font-size: var(--fs-2xl);
+      }
+      .actions button {
+        width: 100%;
+      }
+      .rows li {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+          'icon label btn'
+          '. value value';
+        column-gap: var(--s-3);
+        row-gap: 2px;
+      }
+      .rows li > lucide-icon {
+        grid-area: icon;
+      }
+      .rows li > button {
+        grid-area: btn;
+      }
+      .text {
+        display: contents;
+      }
+      .label {
+        grid-area: label;
+      }
+      .value {
+        grid-area: value;
+      }
     }
   `,
 })

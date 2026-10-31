@@ -4,6 +4,7 @@ import {
   computed,
   effect,
   inject,
+  signal,
   untracked,
 } from '@angular/core';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -15,6 +16,7 @@ import {
   LucideAngularModule,
   PackageSearch,
   ShoppingBag,
+  SlidersHorizontal,
   Smartphone,
 } from 'lucide-angular';
 import { errorMessage } from '../../core/api/api-error';
@@ -84,7 +86,9 @@ export class MarketplaceBrowse {
   private readonly api = inject(PublicApi);
   protected readonly cart = inject(CartService);
   private readonly toast = inject(ToastService);
-  protected readonly i = { BadgeCheck, ShoppingBag, Smartphone, PackageSearch };
+  protected readonly i = { BadgeCheck, ShoppingBag, Smartphone, PackageSearch, SlidersHorizontal };
+  /** Phones: whether the filters under Search are unfolded. Wider screens always show them. */
+  protected readonly showFilters = signal(false);
 
   protected readonly typeOptions = withAll(
     options(LISTING_ITEM_TYPES, { RefurbishedDevice: 'Refurbished phones', Component: 'Parts' }),
@@ -139,6 +143,12 @@ export class MarketplaceBrowse {
   protected readonly filtered = computed(() => {
     const v = this.q.value();
     return Object.entries(v).some(([k, val]) => k !== 'sort' && val !== '');
+  });
+  /** Filters hidden behind the phone "Filters" button that are set (Search stays visible). */
+  protected readonly activeFilters = computed(() => {
+    const v = this.q.value();
+    return Object.entries(v).filter(([k, val]) => k !== 'sort' && k !== 'search' && val !== '')
+      .length;
   });
 
   constructor() {

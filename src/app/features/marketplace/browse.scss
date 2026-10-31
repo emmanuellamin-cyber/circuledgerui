@@ -33,6 +33,11 @@
     grid-auto-flow: row dense;
     position: static;
     padding: var(--s-3);
+
+    // Folded: only Search and the Filters button show until the button is tapped.
+    &.collapsed > :not(.fb-search) {
+      display: none;
+    }
   }
   @media (min-width: 640px) {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -47,6 +52,34 @@
   @media (min-width: 1100px) {
     grid-template-columns: repeat(8, minmax(0, 1fr));
   }
+}
+.fb-search {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--s-2);
+
+  glass-input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+.fb-toggle {
+  flex: none;
+  min-height: 48px;
+
+  @media (min-width: 640px) {
+    display: none;
+  }
+}
+.fb-count {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  line-height: 20px;
+  text-align: center;
 }
 .fb-price {
   display: grid;
@@ -142,4 +175,72 @@
   font-size: var(--fs-xs);
   font-weight: 600;
   color: var(--success);
+}
+.trust {
+  flex-wrap: wrap;
+}
+
+/*
+ * Phones: compact cards, photo on the left and details on the right, with Add to cart across
+ * the bottom. A full-width 4:3 photo made each card almost a screen tall.
+ */
+@media (max-width: 639.98px) {
+  .head h1 {
+    font-size: var(--fs-2xl);
+  }
+  .grid {
+    gap: var(--s-3);
+  }
+  .card {
+    display: grid;
+    grid-template-columns: 108px minmax(0, 1fr);
+    column-gap: var(--s-3);
+    row-gap: 4px;
+    align-content: start;
+  }
+  .link {
+    grid-column: 1;
+    grid-row: 1 / span 4;
+    align-self: start;
+  }
+  .media {
+    aspect-ratio: 1;
+  }
+  .grade {
+    top: 6px;
+    left: 6px;
+    padding: 2px 8px;
+  }
+  .ph lucide-icon {
+    transform: scale(0.75);
+  }
+  .body {
+    display: contents;
+
+    > :not(button) {
+      grid-column: 2;
+    }
+    button {
+      grid-column: 1 / -1;
+      margin-top: var(--s-2);
+    }
+  }
+  .price {
+    font-size: var(--fs-lg);
+  }
+  .trust {
+    margin-bottom: 0;
+  }
+}
+
+/* Very narrow phones: icon-only Filters button so Search keeps its room. */
+@media (max-width: 359.98px) {
+  .fb-toggle-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }

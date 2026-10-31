@@ -11,16 +11,34 @@
   class="filter-bar glass"
   role="search"
   aria-label="Filter the marketplace"
+  [class.collapsed]="!showFilters()"
   (submit)="$event.preventDefault()"
 >
-  <glass-input
-    class="fb-search"
-    label="Search"
-    placeholder="Galaxy, screen, Tecno…"
-    [formControl]="search"
-    autocomplete="off"
-    type="search"
-  />
+  <div class="fb-search">
+    <glass-input
+      label="Search"
+      placeholder="Galaxy, screen, Tecno…"
+      [formControl]="search"
+      autocomplete="off"
+      type="search"
+    />
+    <!-- Phones only: the other filters fold away behind this button. -->
+    <button
+      glass-button
+      type="button"
+      class="fb-toggle"
+      [attr.aria-expanded]="showFilters()"
+      (click)="showFilters.set(!showFilters())"
+    >
+      <lucide-icon [img]="i.SlidersHorizontal" [size]="18" aria-hidden="true" />
+      <span class="fb-toggle-label">Filters</span>
+      @if (activeFilters()) {
+        <span class="fb-count num" [attr.aria-label]="activeFilters() + ' active'">{{
+          activeFilters()
+        }}</span>
+      }
+    </button>
+  </div>
   <glass-select label="Type" [options]="typeOptions" [formControl]="itemType" />
   @if (q.value().itemType === 'Component') {
     <glass-select label="Part" [options]="partOptions" [formControl]="componentType" />

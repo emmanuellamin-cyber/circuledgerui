@@ -170,11 +170,14 @@ export class ModalService {
     component: ComponentType<C>,
     data?: D,
     labelledBy = 'glass-modal-title',
+    /** `narrow` (440px) suits single-column forms; the default is 560px. */
+    size: 'default' | 'narrow' = 'default',
   ): DialogRef<R, C> {
     return this.dialog.open<R, D, C>(component, {
       data,
       backdropClass: 'cl-modal-backdrop',
-      panelClass: 'cl-modal-panel',
+      panelClass:
+        size === 'narrow' ? ['cl-modal-panel', 'cl-modal-panel--narrow'] : 'cl-modal-panel',
       ariaLabelledBy: labelledBy,
       autoFocus: 'first-tabbable',
       restoreFocus: true,

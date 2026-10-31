@@ -132,7 +132,12 @@
   backdrop-filter: none;
   background: rgb(2 16 20 / 0.6);
 }
-.cl-modal-panel {
+// Doubled with .cdk-overlay-pane: the CDK overlay CSS (included after this file) sets
+// `max-width: 100%` on the pane, which would otherwise stretch every dialog to the screen.
+.cdk-overlay-pane.cl-modal-panel {
   max-width: min(560px, calc(100vw - 32px));
   width: 100%;
+}
+.cdk-overlay-pane.cl-modal-panel--narrow {
+  max-width: min(440px, calc(100vw - 32px));
 }

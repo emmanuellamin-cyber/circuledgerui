@@ -276,7 +276,7 @@ export class ProfilePage {
     component: ComponentType<C>,
     data?: D,
   ): Promise<UserProfile | undefined> {
-    const ref = this.modal.open<UserProfile, D, C>(component, data);
+    const ref = this.modal.open<UserProfile, D, C>(component, data, undefined, 'narrow');
     const user = await firstValueFrom(ref.closed);
     // A password change returns the AuthResponse user, which may omit maskedPhone: keep ours.
     if (user) this.profile.update((p) => ({ ...p, ...user }));

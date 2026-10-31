@@ -97,6 +97,8 @@ let nextId = 0;
   styles: `
     :host {
       display: grid;
+      /* Without this the column grows to the input's intrinsic width and overflows narrow cells. */
+      grid-template-columns: minmax(0, 1fr);
       gap: 6px;
       min-width: 0;
     }

@@ -14,6 +14,7 @@
   (submit)="$event.preventDefault()"
 >
   <glass-input
+    class="fb-search"
     label="Search"
     placeholder="Galaxy, screen, Tecno…"
     [formControl]="search"
@@ -26,20 +27,23 @@
   }
   <glass-input label="Brand" placeholder="Samsung" [formControl]="brand" autocomplete="off" />
   <glass-select label="Grade" [options]="gradeOptions" [formControl]="condition" />
-  <glass-input
-    label="Min SLE"
-    type="number"
-    inputmode="numeric"
-    [formControl]="minPrice"
-    [min]="0"
-  />
-  <glass-input
-    label="Max SLE"
-    type="number"
-    inputmode="numeric"
-    [formControl]="maxPrice"
-    [min]="0"
-  />
+  <!-- Min and max stay side by side at every width. -->
+  <div class="fb-price">
+    <glass-input
+      label="Min SLE"
+      type="number"
+      inputmode="numeric"
+      [formControl]="minPrice"
+      [min]="0"
+    />
+    <glass-input
+      label="Max SLE"
+      type="number"
+      inputmode="numeric"
+      [formControl]="maxPrice"
+      [min]="0"
+    />
+  </div>
   <glass-select label="Sort" [options]="sortOptions" [formControl]="sort" />
   <div class="fb-actions">
     <glass-switch label="Samsung only" [formControl]="samsung" />

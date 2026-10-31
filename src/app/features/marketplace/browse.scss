@@ -7,6 +7,52 @@
     margin-top: 4px;
   }
 }
+/**
+ * Filters in a fixed order (Search, Type, Brand, Grade, Min/Max SLE, Sort) on a grid, so rows
+ * line up instead of wrapping unevenly like the shared flex `.filter-bar`.
+ * Phone: 2 columns · tablet: 4 · desktop: Search to Max SLE on one row of 8.
+ */
+.filter-bar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  gap: var(--s-3);
+
+  > .fb-search,
+  > .fb-price,
+  > .fb-actions {
+    grid-column: 1 / -1;
+  }
+  > .fb-actions {
+    justify-content: space-between;
+  }
+
+  // A tall bar would cover most of a phone screen, so it only sticks on wider screens.
+  @media (max-width: 639.98px) {
+    // Sort fills the gap next to Grade instead of sitting alone under the price row.
+    grid-auto-flow: row dense;
+    position: static;
+    padding: var(--s-3);
+  }
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    > .fb-search,
+    > .fb-price {
+      grid-column: span 2;
+    }
+    > .fb-actions {
+      justify-content: flex-end;
+    }
+  }
+  @media (min-width: 1100px) {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+}
+.fb-price {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-3);
+}
 .count {
   margin-bottom: var(--s-2);
   font-size: var(--fs-sm);

@@ -65,6 +65,15 @@ import { CartService } from './cart.service';
       text-decoration: none;
       white-space: nowrap;
     }
+    /* Narrow phones: text-only tabs so Browse, Cart and My orders all fit without scrolling. */
+    @media (max-width: 399.98px) {
+      .sub a {
+        padding: 0 12px;
+      }
+      .sub a lucide-icon {
+        display: none;
+      }
+    }
     .sub a.on {
       background: var(--glass-fill-strong);
       color: var(--text-1);

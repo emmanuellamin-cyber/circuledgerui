@@ -33,7 +33,7 @@ import { UserMenu } from './user-menu';
           }
           <user-menu />
         } @else {
-          <a glass-button variant="primary" routerLink="/login">
+          <a glass-button variant="primary" class="login" routerLink="/login">
             <lucide-icon [img]="LogIn" [size]="17" aria-hidden="true" /> Log in
           </a>
         }
@@ -94,6 +94,15 @@ import { UserMenu } from './user-menu';
     }
     .ws {
       display: none;
+    }
+    /* Narrow phones: a slimmer Log in button so the signed-out bar fits. */
+    @media (max-width: 399.98px) {
+      .login {
+        padding-inline: var(--s-4);
+      }
+      .login lucide-icon {
+        display: none;
+      }
     }
     @media (min-width: 600px) {
       .ws {

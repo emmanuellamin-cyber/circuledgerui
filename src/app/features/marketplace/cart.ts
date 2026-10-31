@@ -223,6 +223,55 @@ import { CartItem, CartService } from './cart.service';
       text-align: center;
       margin-top: var(--s-3);
     }
+    /* A single auto column would grow to its content and push the cards off narrow screens. */
+    .layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .total {
+      flex-wrap: wrap;
+      gap: var(--s-2);
+    }
+    .total strong,
+    .price {
+      white-space: nowrap;
+    }
+    .trust {
+      align-items: flex-start;
+    }
+    .trust lucide-icon {
+      flex: none;
+      margin-top: 1px;
+    }
+    /* Phones: title and certificate get the full middle column, the price goes under them. */
+    @media (max-width: 639.98px) {
+      .items li {
+        grid-template-columns: 56px minmax(0, 1fr) auto;
+        grid-template-areas:
+          'thumb txt rm'
+          'thumb price rm';
+        row-gap: 4px;
+        padding-inline: var(--s-1);
+      }
+      .thumb {
+        grid-area: thumb;
+        width: 56px;
+        height: 56px;
+        align-self: start;
+      }
+      .txt {
+        grid-area: txt;
+      }
+      .price {
+        grid-area: price;
+      }
+      .rm {
+        grid-area: rm;
+        align-self: start;
+      }
+      .total strong {
+        font-size: var(--fs-xl);
+      }
+    }
   `,
 })
 export class MarketplaceCart {

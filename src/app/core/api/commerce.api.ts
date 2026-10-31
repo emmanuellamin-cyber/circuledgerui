@@ -24,6 +24,7 @@ import type {
   ReinvestmentRule,
 } from './types';
 import type {
+  CancelOrderRequest,
   CreateOrderRequest,
   PayOrderRequest,
   UpdateListingRequest,
@@ -120,8 +121,10 @@ export class OrdersApi {
   fulfil(id: string): Observable<Order> {
     return this.api.post<Order>(`/orders/${id}/fulfil`);
   }
+  /** Pending only. 400 `errors.Reason`, 403 not the buyer, 422 no longer Pending. */
   cancel(id: string, reason: string): Observable<Order> {
-    return this.api.post<Order>(`/orders/${id}/cancel`, { reason });
+    const body: CancelOrderRequest = { reason };
+    return this.api.post<Order>(`/orders/${id}/cancel`, body);
   }
 }
 

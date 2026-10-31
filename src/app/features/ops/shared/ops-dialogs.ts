@@ -1,5 +1,12 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
@@ -24,7 +31,14 @@ import {
 } from '../../../core/enums/labels';
 import { formatSle } from '../../../core/format/format';
 import { useAction } from '../../../core/state/action';
-import { GlassButton, GlassInput, GlassModal, GlassSelect, SelectOption } from '../../../shared/ui';
+import {
+  GlassButton,
+  GlassInput,
+  GlassModal,
+  GlassSelect,
+  SelectOption,
+  ToastService,
+} from '../../../shared/ui';
 
 /** Prepends an "All" option for filter selects. */
 export function withAll<T extends string>(opts: SelectOption<T>[], label = 'All'): SelectOption[] {
@@ -55,9 +69,26 @@ export interface ReasonDialogData {
   message?: string;
   confirmLabel: string;
   danger?: boolean;
+  /** Quick picks that fill the reason box; "Other…" clears it for free text. */
+  presets?: readonly string[];
+  /** Per-code friendly messages for failures (see `ActionOptions.messages`). */
+  messages?: Record<string, string>;
+  /** Failures that mean the item changed under us: toast, then close with `null` so the caller refreshes. */
+  staleStatuses?: readonly number[];
   /** Runs with the typed reason; the dialog closes with its result on success. */
   submit: (reason: string) => Promise<unknown> | Observable<unknown>;
 }
+
+/** §8.14 order cancel: quick reasons, friendly errors, and 404/422 mean the order changed. */
+export const ORDER_CANCEL: Pick<ReasonDialogData, 'presets' | 'messages' | 'staleStatuses'> = {
+  presets: ['Changed my mind', 'Found a better price', 'Ordered by mistake'],
+  messages: {
+    forbidden: 'Only the buyer who placed this order, or Operations, can cancel it.',
+    not_found: 'This order no longer exists.',
+    invalid_state_transition: "This order is no longer pending, so it can't be cancelled.",
+  },
+  staleStatuses: [404, 422],
+};
 
 /** Cancel / reject / revoke with a required reason. */
 @Component({
@@ -66,12 +97,29 @@ export interface ReasonDialogData {
   imports: [ReactiveFormsModule, GlassModal, GlassInput, GlassButton],
   template: `
     <glass-modal [heading]="data.title" [description]="data.message" (closed)="ref.close()">
-      <form id="reason-form" (ngSubmit)="submit()">
+      <form id="reason-form" [formGroup]="form" (ngSubmit)="submit()">
+        @if (data.presets?.length) {
+          <div class="presets" role="group" aria-label="Common reasons">
+            @for (p of data.presets; track p) {
+              <button
+                type="button"
+                class="chip"
+                [attr.aria-pressed]="reason.value === p"
+                (click)="pick(p)"
+              >
+                {{ p }}
+              </button>
+            }
+            <button type="button" class="chip" [attr.aria-pressed]="isOther()" (click)="pick('')">
+              Other…
+            </button>
+          </div>
+        }
         <glass-input
           label="Reason"
           [rows]="3"
           [maxlength]="300"
-          [formControl]="reason"
+          formControlName="reason"
           [required]="true"
         />
         @if (action.error(); as e) {
@@ -93,6 +141,29 @@ export interface ReasonDialogData {
     </glass-modal>
   `,
   styles: `
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--s-2);
+      margin-bottom: var(--s-3);
+    }
+    .chip {
+      min-height: 40px;
+      padding: 0 14px;
+      border: 1px solid var(--field-border);
+      border-radius: var(--r-pill);
+      background: var(--glass-fill-nested);
+      color: var(--text-2);
+      font: inherit;
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .chip[aria-pressed='true'] {
+      border-color: var(--accent);
+      background: var(--glass-fill-strong);
+      color: var(--text-1);
+    }
     .form-error {
       margin-top: var(--s-3);
     }
@@ -101,18 +172,45 @@ export interface ReasonDialogData {
 export class ReasonDialog {
   protected readonly data = inject<ReasonDialogData>(DIALOG_DATA);
   protected readonly ref = inject(DialogRef);
+  private readonly toast = inject(ToastService);
+  private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
   protected readonly action = useAction();
-  protected readonly reason = new FormControl('', {
-    nonNullable: true,
-    validators: [Validators.required, Validators.maxLength(300)],
+  protected readonly form = new FormGroup({
+    reason: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.maxLength(300)],
+    }),
   });
+  protected readonly reason = this.form.controls.reason;
+  private readonly reasonValue = toSignal(this.reason.valueChanges, {
+    initialValue: this.reason.value,
+  });
+  private readonly otherPicked = signal(false);
+  protected readonly isOther = computed(
+    () => this.otherPicked() && !this.data.presets?.includes(this.reasonValue()),
+  );
+
+  protected pick(preset: string): void {
+    this.otherPicked.set(!preset);
+    this.reason.setValue(preset);
+    if (!preset) this.host.nativeElement.querySelector<HTMLElement>('textarea')?.focus();
+  }
 
   async submit(): Promise<void> {
+    this.reason.setValue(this.reason.value.trim());
     this.reason.markAsTouched();
     if (this.reason.invalid) return;
-    const work = this.data.submit(this.reason.value.trim());
-    const res = await this.action.run(() => work);
-    if (res !== undefined) this.ref.close(res);
+    const work = this.data.submit(this.reason.value);
+    const res = await this.action.run(() => work, {
+      form: this.form,
+      messages: this.data.messages,
+    });
+    if (res !== undefined) {
+      this.ref.close(res);
+    } else if (this.data.staleStatuses?.includes(this.action.status() ?? -1)) {
+      this.toast.show(this.action.error() ?? 'This changed in the meantime.', 'warning');
+      this.ref.close(null);
+    }
   }
 }
 

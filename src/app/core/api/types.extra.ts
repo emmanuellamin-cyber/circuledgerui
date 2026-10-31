@@ -68,6 +68,9 @@ export interface ReasonRequest {
   reason: string;
 }
 
+/** §8.14 `POST /orders/{id}/cancel`: `reason` is required, 1–300 characters. */
+export type CancelOrderRequest = ReasonRequest;
+
 /** §8.5 `PUT /intake-requests/{id}/pickup-location` */
 export interface SetPickupLocationRequest {
   latitude: number;

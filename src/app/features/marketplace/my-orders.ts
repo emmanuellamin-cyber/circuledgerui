@@ -17,7 +17,7 @@ import {
   StatusPill,
   ToastService,
 } from '../../shared/ui';
-import { ReasonDialog, ReasonDialogData } from '../ops/shared/ops-dialogs';
+import { ORDER_CANCEL, ReasonDialog, ReasonDialogData } from '../ops/shared/ops-dialogs';
 
 /** My orders (§9 D): GET /orders/mine. */
 @Component({
@@ -297,12 +297,13 @@ export class MyOrder {
       title: `Cancel ${o.orderNumber}?`,
       message: 'The items go back on sale for other buyers.',
       confirmLabel: 'Cancel order',
+      ...ORDER_CANCEL,
       danger: true,
       submit: (reason) => this.orders.cancel(o.id, reason),
     };
-    this.modal.open<Order>(ReasonDialog, data).closed.subscribe((res) => {
-      if (!res) return;
-      this.toast.success('Order cancelled.');
+    this.modal.open<Order | null>(ReasonDialog, data).closed.subscribe((res) => {
+      if (res === undefined) return;
+      if (res) this.toast.success('Order cancelled.');
       this.order.reload();
     });
   }

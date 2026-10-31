@@ -24,7 +24,7 @@ import {
   StatusPill,
   ToastService,
 } from '../../../shared/ui';
-import { ReasonDialog, ReasonDialogData, withAll } from '../shared/ops-dialogs';
+import { ORDER_CANCEL, ReasonDialog, ReasonDialogData, withAll } from '../shared/ops-dialogs';
 
 /** POST /orders/{id}/pay: confirms payment, marks items Sold, credits the funds (§8.14). */
 @Component({
@@ -422,14 +422,14 @@ export class OpsOrders {
       title: `Cancel ${o.orderNumber}?`,
       message: 'The listings go back on sale.',
       confirmLabel: 'Cancel order',
+      ...ORDER_CANCEL,
       danger: true,
       submit: (reason) => this.orders.cancel(o.id, reason),
     };
-    this.modal.open<Order>(ReasonDialog, data).closed.subscribe((res) => {
-      if (res) {
-        this.toast.success('Order cancelled.');
-        this.refresh();
-      }
+    this.modal.open<Order | null>(ReasonDialog, data).closed.subscribe((res) => {
+      if (res === undefined) return;
+      if (res) this.toast.success('Order cancelled.');
+      this.refresh();
     });
   }
   protected money(v: number): string {

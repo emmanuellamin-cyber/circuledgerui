@@ -143,7 +143,7 @@ export class CreateUserDialog {
       [description]="data.fullName + ' · ' + data.email"
       (closed)="ref.close()"
     >
-      <form id="ro-form" (ngSubmit)="submit()" class="stack">
+      <form id="ro-form" (submit)="$event.preventDefault(); submit()" class="stack">
         <checkbox-group label="Roles" [formControl]="roles" [options]="options" />
         <p class="banner info">Changes apply when they next log in or their session refreshes.</p>
         @if (action.error(); as e) {

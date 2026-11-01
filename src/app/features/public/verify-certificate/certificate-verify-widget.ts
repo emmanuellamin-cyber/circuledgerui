@@ -32,7 +32,7 @@ import { GlassButton, GlassInput, StatusPill } from '../../../shared/ui';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, GlassInput, GlassButton, StatusPill, LucideAngularModule],
   template: `
-    <form class="form" (ngSubmit)="verify()" aria-label="Verify a certificate">
+    <form class="form" (submit)="$event.preventDefault(); verify()" aria-label="Verify a certificate">
       <glass-input
         label="Certificate number"
         placeholder="CDS-2026-000045"
